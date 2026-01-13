@@ -640,6 +640,30 @@
                 </div>
 
                 <div style="margin-bottom:10px;">
+                    <label style="display:block; font-weight:bold;">🃏 配布枚数 (5文字)</label>
+                    <div v-if="isMeMaster">
+                        <input type="range" v-model.number="tempSettings.handSizeFive" min="1" max="10" step="1"
+                            style="width:100%;" @change="saveSettings">
+                        <div style="text-align:right;">{{ tempSettings.handSizeFive || 10 }} 枚</div>
+                    </div>
+                    <div v-else>
+                        {{ settings.handSizeFive || 10 }} 枚
+                    </div>
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-weight:bold;">🃏 配布枚数 (7文字)</label>
+                    <div v-if="isMeMaster">
+                        <input type="range" v-model.number="tempSettings.handSizeSeven" min="1" max="10" step="1"
+                            style="width:100%;" @change="saveSettings">
+                        <div style="text-align:right;">{{ tempSettings.handSizeSeven || 5 }} 枚</div>
+                    </div>
+                    <div v-else>
+                        {{ settings.handSizeSeven || 5 }} 枚
+                    </div>
+                </div>
+
+                <div style="margin-bottom:10px;">
                     <label style="display:block; font-weight:bold;">❤️ いいねの点数</label>
                     <div v-if="isMeMaster">
                         <input type="number" v-model.number="tempSettings.likePoints" min="0" max="100"
@@ -694,7 +718,8 @@
                         <span>{{ p.name }}</span>
                         <span v-if="p.winCount && p.winCount > 0" class="win-badge"
                             style="font-size:0.8rem; margin-left:4px;">
-                            <img src="./haiku_badge.png" class="win-icon" style="width:16px; height:16px;" alt="🏆"> {{
+                            <img src="./haiku_badge.png" class="win-icon" style="width:16px; height:16px;" alt="🏆">
+                            {{
                             p.winCount }}
                         </span>
                         <!-- 親表示設定がOFFのときは「親済」バッジも隠す（誰が親かわからないように） -->
@@ -865,7 +890,8 @@
                         <span :style="{color: haiku.top.isOni ? 'purple' : 'inherit'}">{{ haiku.top.text }}</span>　
                         <span :style="{color: haiku.middle.isOni ? 'purple' : 'inherit'}">{{ haiku.middle.text
                             }}</span>　
-                        <span :style="{color: haiku.bottom.isOni ? 'purple' : 'inherit'}">{{ haiku.bottom.text }}</span>
+                        <span :style="{color: haiku.bottom.isOni ? 'purple' : 'inherit'}">{{ haiku.bottom.text
+                            }}</span>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#888;">
@@ -930,7 +956,8 @@
                                 style="background:#ad8a80;">3位
                                 {{ settings.everyonePlays ? '' : '(20pt)' }}</span>
                             <span v-else class="rank-badge" style="background:#eee; color:#666;">
-                                {{ (haiku.rank || haiku._virtualRank) ? (haiku.rank || haiku._virtualRank) + '位' : '圏外'
+                                {{ (haiku.rank || haiku._virtualRank) ? (haiku.rank || haiku._virtualRank) + '位' :
+                                '圏外'
                                 }}
                             </span>
                         </div>
@@ -1403,7 +1430,8 @@
         ];
 
         // 配札ロジック (Util)
-        function generateHand() {
+        // 引数で枚数を指定可能にする (デフォルト: 5文字=5枚, 7文字=7枚)
+        function generateHand(count5 = 5, count7 = 7) {
             const fives = WORD_DICTIONARY.filter(w => w.type === 5);
             const sevens = WORD_DICTIONARY.filter(w => w.type === 7);
 
@@ -1413,10 +1441,10 @@
                 return shuffled.slice(0, count).map(w => ({ ...w, id: Math.random().toString(36).substr(2, 9) }));
             };
 
-            // 5文字10枚, 7文字5枚
+            // 指定枚数配布
             return {
-                fives: pick(fives, 10),
-                sevens: pick(sevens, 5)
+                fives: pick(fives, count5),
+                sevens: pick(sevens, count7)
             };
         }
 
@@ -1445,6 +1473,7 @@
                     useSpecialEffect: false,
                     showSpecialEffectOverlay: false,
                     specialEffectHaiku: null,
+                    specialEffectQueue: [], // 複数の演出用キュー
                     isSpecialEffectDone: false, // 演出再生済みフラグ
 
                     freeInputText: '',
@@ -1474,14 +1503,18 @@
                         showMaster: true,
                         showScore: true,
                         likePoints: 10,
-                        everyonePlays: false
+                        everyonePlays: false,
+                        handSizeFive: 10,
+                        handSizeSeven: 5
                     },
                     tempSettings: { // 編集用
                         timeLimitMin: 5,
                         showMaster: true,
                         showScore: true,
                         likePoints: 10,
-                        everyonePlays: false
+                        everyonePlays: false,
+                        handSizeFive: 10,
+                        handSizeSeven: 5
                     },
                     roundStartTime: null,
                     timeLeft: 0,
@@ -1714,10 +1747,11 @@
                                 settings: {
                                     timeLimit: 300,
                                     showMaster: true,
-                                    showMaster: true,
                                     showScore: true,
                                     likePoints: 10,
-                                    everyonePlays: false
+                                    everyonePlays: false,
+                                    handSizeFive: 10, // 5文字カード枚数
+                                    handSizeSeven: 5  // 7文字カード枚数
                                 },
                                 roundStartTime: null
                             });
@@ -1820,6 +1854,8 @@
                                     this.tempSettings.showMaster = this.settings.showMaster;
                                     this.tempSettings.likePoints = this.settings.likePoints;
                                     this.tempSettings.everyonePlays = this.settings.everyonePlays;
+                                    this.tempSettings.handSizeFive = this.settings.handSizeFive || 10;
+                                    this.tempSettings.handSizeSeven = this.settings.handSizeSeven || 5;
                                 }
                             } else {
                                 this.viewState = 'GAME';
@@ -1837,17 +1873,8 @@
                                 // 演出判定
                                 // 少し待ってから俳句リストを確認（同期ズレ対策）
                                 setTimeout(() => {
-                                    const special = this.currentHaikus.find(h => h.isSpecial);
-                                    if (special && !this.isSpecialEffectDone) {
-                                        this.specialEffectHaiku = special;
-                                        this.showSpecialEffectOverlay = true;
-                                        this.isSpecialEffectDone = true; // 1ラウンド1回だけ再生
-
-                                        // 5秒後に消す
-                                        setTimeout(() => {
-                                            this.showSpecialEffectOverlay = false;
-                                            this.specialEffectHaiku = null;
-                                        }, 5000);
+                                    if (!this.isSpecialEffectDone) {
+                                        this.processSpecialEffects();
                                     }
                                 }, 1000);
                             } else {
@@ -1895,6 +1922,43 @@
                     }, (error) => {
                         console.error('Haikus listener error:', error);
                     });
+                },
+
+                processSpecialEffects() {
+                    const specials = this.currentHaikus.filter(h => h.isSpecial);
+                    if (specials.length > 0) {
+                        // ランダムキー順などでソート済みであることを期待するなら currentHaikus の順序に従う
+                        // 演出用にキューに入れる
+                        this.specialEffectQueue = [...specials];
+                        this.isSpecialEffectDone = true; // 再生開始フラグ
+                        this.playNextSpecialEffect();
+                    }
+                },
+
+                playNextSpecialEffect() {
+                    if (this.specialEffectQueue.length === 0) {
+                        this.showSpecialEffectOverlay = false;
+                        this.specialEffectHaiku = null;
+                        return;
+                    }
+
+                    const next = this.specialEffectQueue.shift();
+                    this.specialEffectHaiku = next;
+                    this.showSpecialEffectOverlay = true;
+
+                    // 5秒後に次へ
+                    setTimeout(() => {
+                        this.showSpecialEffectOverlay = false; // 一旦消す（フェードアウト用）
+
+                        // 少し間隔を空けて次
+                        if (this.specialEffectQueue.length > 0) {
+                            setTimeout(() => {
+                                this.playNextSpecialEffect();
+                            }, 500); // 0.5秒間隔
+                        } else {
+                            this.specialEffectHaiku = null;
+                        }
+                    }, 5000);
                 },
 
                 // --- UI表示用クラス ---
@@ -2212,7 +2276,9 @@
                         showMaster: this.tempSettings.showMaster,
                         showScore: this.tempSettings.showScore,
                         likePoints: this.tempSettings.likePoints,
-                        everyonePlays: this.tempSettings.everyonePlays
+                        everyonePlays: this.tempSettings.everyonePlays,
+                        handSizeFive: this.tempSettings.handSizeFive,
+                        handSizeSeven: this.tempSettings.handSizeSeven
                     };
                     await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
                 },
@@ -2310,7 +2376,7 @@
                         const nextMasterUid = this.players[nextMasterIdx].uid;
 
                         const refreshedPlayers = this.players.map(p => {
-                            return { ...p, hand: generateHand() };
+                            return { ...p, hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven) };
                         });
 
                         const newHistory = [...this.masterHistory];
@@ -2334,7 +2400,7 @@
                         score: 0,
                         totalLikes: 0,
                         // winCountは維持される(pに含まれるため)
-                        hand: generateHand()
+                        hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven)
                     }));
                     const firstMaster = resetPlayers[0].uid;
 
@@ -2466,7 +2532,7 @@
                             score: 0,
                             totalLikes: 0,
                             winCount: 0,
-                            hand: generateHand()
+                            hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven)
                         });
                     }
                     await updateDoc(doc(db, "rooms", this.roomId), { players: arrayUnion(...newPlayers) });
