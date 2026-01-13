@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性癖句会ロワイヤル - Online</title>
+    <!-- Vue.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.19/vue.global.prod.min.js"></script>
+    <!-- フォント -->
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- デザイン定義 --- */
+        :root {
+            --bg-color: #fcfaf2;
+            --text-color: #3e3a39;
+            --accent-color: #b93a32;
+            --oni-color: #800080;
+            --sub-color: #2a3a55;
+            --gold-color: #c5a059;
+            --free-color: #2e8b57;
+        }
+
+        body {
+            font-family: 'Shippori Mincho', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            background-image: radial-gradient(#e6e2d3 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding-bottom: 50px;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+            margin-bottom: 0.5em;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            border-bottom: 3px double var(--accent-color);
+            display: inline-block;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .card-box {
+            background: #fff;
+            border: 1px solid #dcdcdc;
+            box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        /* 順位表エリア */
+        .scoreboard {
+            font-size: 0.85rem;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dotted #ccc;
+            padding: 6px 0;
+        }
+
+        .master-badge {
+            font-size: 0.7rem;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        .master-done {
+            background: #ddd;
+            color: #555;
+        }
+
+        .master-yet {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .heart-count {
+            color: #e91e63;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background-color: var(--sub-color);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            font-family: 'Shippori Mincho', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .btn-danger {
+            background-color: #d9534f;
+            font-size: 0.9rem;
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-add {
+            background-color: var(--free-color);
+            width: auto;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+        }
+
+        /* 俳句作成エリア */
+        .haiku-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: #eee;
+            padding: 15px;
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .haiku-slot {
+            width: 100%;
+            padding: 10px;
+            background: #fff;
+            border: 2px dashed #aaa;
+            text-align: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            min-height: 1.5em;
+        }
+
+        .haiku-slot.filled {
+            border: 2px solid var(--sub-color);
+            background: #f0f8ff;
+            font-weight: bold;
+        }
+
+        .haiku-slot.filled.oni {
+            border: 2px solid var(--oni-color);
+            background: #f3e6f3;
+            color: var(--oni-color);
+        }
+
+        .haiku-slot.filled.free {
+            border: 2px solid var(--free-color);
+            background: #f0fff0;
+            color: #006400;
+        }
+
+        /* 自由記入エリア */
+        .free-input-area {
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* 手札エリア */
+        .hand-section {
+            margin-top: 10px;
+        }
+
+        .hand-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .card-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-start;
+        }
+
+        .word-card {
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            position: relative;
+            text-align: center;
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+
+        .word-card.oni {
+            border-color: var(--oni-color);
+            color: var(--oni-color);
+            background: #fffafa;
+            font-weight: bold;
+        }
+
+        .word-card.free {
+            border-color: var(--free-color);
+            color: #006400;
+        }
+
+        .word-card.selected {
+            background: #ccc;
+            color: #fff;
+            pointer-events: none;
+        }
+
+        .point-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--sub-color);
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .word-card.oni .point-badge {
+            background: var(--oni-color);
+        }
+
+        .word-card.free .point-badge {
+            background: var(--free-color);
+        }
+
+        /* 短冊リスト */
+        .tanzaku {
+            background: #fff;
+            padding: 10px 15px;
+            border-left: 5px solid var(--sub-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
+        }
+
+        .rank-badge {
+            padding: 2px 8px;
+            color: white;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .error-msg {
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .win-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #fff8dc;
+            border: 1px solid #ffd700;
+            border-radius: 20px;
+            padding: 2px 8px;
+            margin-left: 5px;
+            font-size: 0.85rem;
+            color: #d2691e;
+            font-weight: bold;
+        }
+
+        .win-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        /* --- デバッグ用 --- */
+        .debug-panel {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            z-index: 9999;
+            font-size: 0.8rem;
+            width: 320px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .debug-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+
+        .debug-tab {
+            background: #333;
+            color: #ccc;
+            padding: 4px 8px;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.75rem;
+            border: 1px solid #444;
+        }
+
+        .debug-tab.active {
+            background: #e91e63;
+            color: white;
+            font-weight: bold;
+            border-color: #e91e63;
+        }
+
+        .debug-btn {
+            background: #555;
+            color: white;
+            border: 1px solid #777;
+            padding: 4px 8px;
+            margin: 2px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .debug-btn:hover {
+            background: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app" class="app-container" v-cloak>
+
+        <div style="text-align: center;">
+            <div class="logo">性癖句会ロワイヤル</div>
+        </div>
+
+        <!-- 1. ロビー画面 -->
+        <div v-if="viewState === 'LOBBY'" class="card-box" style="text-align:center;">
+            <h2>入室</h2>
+            <span v-if="errorMessage" class="error-msg">{{ errorMessage }}</span>
+
+            <label>お名前</label>
+            <input type="text" v-model="myPlayerName" placeholder="例：松尾芭蕉"
+                style="width:100%; padding:10px; margin-bottom:15px; box-sizing:border-box;">
+
+            <label>部屋番号（4桁）</label>
+            <input type="text" v-model="roomId" maxlength="4" placeholder="1234"
+                style="width:100%; padding:10px; margin-bottom:15px; box-sizing:border-box;">
+
+            <button class="btn btn-primary" @click="enterRoom" :disabled="!roomId || !myPlayerName || isLoading">
+                {{ isLoading ? '通信中...' : '部屋に入る / 作る' }}
+            </button>
+            <div style="margin-top:15px; text-align:center;">
+                <label style="display:inline-flex; align-items:center; cursor:pointer; color:#555; font-size:0.85rem;">
+                    <input type="checkbox" v-model="isTestMode" style="margin-right:6px;">
+                    🛠️ テストモード (NPC機能など)
+                </label>
+            </div>
+
+            <!-- ルームリセットボタン -->
+            <div style="margin-top:20px; padding-top:15px; border-top:1px dashed #ccc;">
+                <p style="font-size:0.8rem; color:#666; margin-bottom:8px;">前回のルーム情報をリセットしたい場合</p>
+                <button class="btn" style="background:#888; font-size:0.85rem;" @click="resetRoom"
+                    :disabled="!roomId || isLoading">
+                    🗑️ ルーム情報をリセット
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. ロビー（待機・設定）画面 -->
+        <div v-else-if="viewState === 'WAITING'" class="card-box">
+            <h2>ロビー / 設定</h2>
+            <div style="text-align:center; margin-bottom:15px;">
+                <p>現在 <strong>{{ players.length }}</strong> 名が待機中</p>
+                <div
+                    style="max-height: 150px; overflow-y: auto; text-align: left; background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                    <div v-for="p in players" :key="p.uid"
+                        style="padding: 4px 0; border-bottom: 1px dotted #eee; display:flex; justify-content:space-between;">
+                        <span>
+                            <span v-if="p.uid === masterUid">👑</span>
+                            <span v-else>👤</span>
+                            {{ p.name }}
+                            <span v-if="p.winCount && p.winCount > 0" class="win-badge"
+                                style="font-size:0.8rem; margin-left:4px;">
+                                <img src="./haiku_badge.png" class="win-icon" style="width:16px; height:16px;" alt="🏆">
+                                {{ p.winCount }}
+                            </span>
+                        </span>
+                        <span v-if="p.uid === myUid" style="font-size:0.8rem; color:#888;">(あなた)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 設定エリア (親のみ編集可) -->
+            <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;">
+                <h3 style="margin-top:0;">ルール設定</h3>
+
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-weight:bold;">⏳ 制限時間 (分)</label>
+                    <div v-if="isMeMaster">
+                        <input type="range" v-model.number="tempSettings.timeLimitMin" min="1" max="10" step="1"
+                            style="width:100%;" @change="saveSettings">
+                        <div style="text-align:right;">{{ tempSettings.timeLimitMin }} 分</div>
+                    </div>
+                    <div v-else>
+                        {{ settings.timeLimit / 60 }} 分
+                    </div>
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-weight:bold;">🎭 親を表示する</label>
+                        <div v-if="isMeMaster">
+                            <input type="checkbox" v-model="tempSettings.showMaster" style="transform:scale(1.5);"
+                                @change="saveSettings">
+                        </div>
+                        <div v-else>
+                            {{ settings.showMaster ? 'ON' : 'OFF' }}
+                        </div>
+                    </div>
+                    <p style="font-size:0.8rem; color:#666; margin-top:2px;">
+                        {{ tempSettings.showMaster ? '誰が親か表示されます' : '誰が親かわかりません（ドキドキ！）' }}
+                    </p>
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-weight:bold;">📊 点数・順位を表示</label>
+                        <div v-if="isMeMaster">
+                            <input type="checkbox" v-model="tempSettings.showScore" style="transform:scale(1.5);"
+                                @change="saveSettings">
+                        </div>
+                        <div v-else>
+                            {{ settings.showScore ? 'ON' : 'OFF' }}
+                        </div>
+                    </div>
+                    <p style="font-size:0.8rem; color:#666; margin-top:2px;">
+                        OFFにすると勝ち負けを気にせず楽しめます
+                    </p>
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-weight:bold;">🎉 全員参加モード</label>
+                        <div v-if="isMeMaster">
+                            <input type="checkbox" v-model="tempSettings.everyonePlays" style="transform:scale(1.5);"
+                                @change="saveSettings">
+                        </div>
+                        <div v-else>
+                            {{ settings.everyonePlays ? 'ON' : 'OFF' }}
+                        </div>
+                    </div>
+                    <p style="font-size:0.8rem; color:#666; margin-top:2px;">
+                        親も俳句を詠み、いいねだけで競います（順位なし）
+                    </p>
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-weight:bold;">❤️ いいねの点数</label>
+                    <div v-if="isMeMaster">
+                        <input type="number" v-model.number="tempSettings.likePoints" min="0" max="100"
+                            style="padding:5px; width:80px;" @change="saveSettings"> 点
+                    </div>
+                    <div v-else>
+                        {{ settings.likePoints }} 点
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="isMeMaster" style="text-align:center;">
+                <button class="btn btn-primary" @click="startGame">ゲーム開始！</button>
+            </div>
+            <div v-else style="text-align:center; color:#666;">
+                親が設定中です。開始をお待ちください...
+            </div>
+
+            <div style="margin-top:20px; text-align:center;">
+                <button class="btn btn-danger" style="width:auto; padding:5px 10px; font-size:0.8rem;"
+                    @click="leaveRoom">退出</button>
+            </div>
+        </div>
+
+        <!-- 2. ゲーム画面 -->
+        <div v-else-if="viewState === 'GAME'">
+
+            <!-- ヘッダー情報 -->
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; font-size:0.9rem; font-weight:bold;">
+                <span>第 {{ roundCount }} / {{ players.length }} 句</span>
+                <span>
+                    親：{{ settings.showMaster ? getMasterName() : '???' }}
+                    <span v-if="gamePhase === 'WRITING' && timeLeft > 0"
+                        style="margin-left:10px; color:var(--accent-color);">
+                        残り {{ Math.floor(timeLeft / 60) }}:{{ ('0' + (timeLeft % 60)).slice(-2) }}
+                    </span>
+                    <span v-else-if="gamePhase === 'WRITING'" style="margin-left:10px; color:red;">終了！</span>
+                </span>
+                <button class="btn btn-danger" style="width:auto; padding:5px 10px; font-size:0.75rem;"
+                    @click="leaveRoom">退出</button>
+            </div>
+
+            <!-- 順位表 -->
+            <div class="card-box scoreboard">
+                <div style="font-weight:bold; margin-bottom:5px; text-align:center;">現在の順位表</div>
+                <div v-for="(p, index) in sortedPlayers" :key="p.uid" class="score-row">
+                    <div style="display:flex; align-items:center;">
+                        <span style="display:inline-block; width:20px; text-align:center; font-weight:bold;">
+                            {{ settings.showScore ? (index + 1) : '-' }}
+                        </span>
+                        <span>{{ p.name }}</span>
+                        <span v-if="p.winCount && p.winCount > 0" class="win-badge"
+                            style="font-size:0.8rem; margin-left:4px;">
+                            <img src="./haiku_badge.png" class="win-icon" style="width:16px; height:16px;" alt="🏆"> {{
+                            p.winCount }}
+                        </span>
+                        <!-- 親表示設定がOFFのときは「親済」バッジも隠す（誰が親かわからないように） -->
+                        <span v-if="settings.showMaster" class="master-badge"
+                            :class="hasBeenMaster(p.uid) ? 'master-done' : 'master-yet'">
+                            {{ hasBeenMaster(p.uid) ? '親済' : '親未' }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="heart-count">❤️ {{ p.totalLikes || 0 }}</span>
+                        <b v-if="settings.showScore">{{ p.score }} pt</b>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A. 詠唱タイム -->
+            <div v-if="gamePhase === 'WRITING'">
+                <div style="text-align:center; margin-bottom:10px;">
+                    <p v-if="isMeMaster && !settings.everyonePlays">あなたは「親」です。皆の提出を待ちましょう。</p>
+                    <p v-else>手札から最強の句を詠んでください。</p>
+                    <!-- 全員に提出状況を表示 -->
+                    <div style="background:#f0f0f0; padding:8px; border-radius:4px; margin-top:5px;">
+                        📝 提出状況: <strong>{{ submittedCount }} / {{ settings.everyonePlays ? players.length :
+                            players.length - 1 }}</strong> 人
+                    </div>
+                </div>
+
+                <!-- 親の画面 (通常モード) -->
+                <div v-if="isMeMaster && !settings.everyonePlays" class="card-box" style="text-align:center;">
+                    <button class="btn btn-primary" @click="forceAllSubmit"
+                        :disabled="submittedCount >= players.length - 1">
+                        未提出者を強制提出させて次へ
+                    </button>
+                    <p style="font-size:0.8rem; color:#666; margin-top:5px;">※全員出すと自動で進みます</p>
+                </div>
+
+                <!-- 子の画面（または全員参加モードの全員） -->
+                <div v-else>
+                    <!-- 親用の強制進行ボタン（全員参加モード時） -->
+                    <div v-if="isMeMaster && settings.everyonePlays" class="card-box"
+                        style="text-align:center; margin-bottom:15px; background:#fff3e0;">
+                        <p style="font-size:0.9rem; font-weight:bold; color:#e65100; margin-bottom:5px;">
+                            あなたは親ですが、今回は参加者です！</p>
+                        <button class="btn btn-secondary" @click="forceAllSubmit"
+                            style="font-size:0.8rem; padding:4px 8px;" :disabled="submittedCount >= players.length">
+                            強制的に次へ進む
+                        </button>
+                    </div>
+                    <!-- プレビュー & リセット -->
+                    <div class="haiku-preview">
+                        <!-- 上五 -->
+                        <div class="haiku-slot" :class="getSlotClass(myDraft.top)" @click="removePart('top')">
+                            {{ myDraft.top ? myDraft.top.text : '（上五）' }}
+                        </div>
+                        <!-- 中七 -->
+                        <div class="haiku-slot" :class="getSlotClass(myDraft.middle)" @click="removePart('middle')">
+                            {{ myDraft.middle ? myDraft.middle.text : '（中七）' }}
+                        </div>
+                        <!-- 下五 -->
+                        <div class="haiku-slot" :class="getSlotClass(myDraft.bottom)" @click="removePart('bottom')">
+                            {{ myDraft.bottom ? myDraft.bottom.text : '（下五）' }}
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                            <button class="btn btn-danger" @click="resetDraft" :disabled="hasSubmitted">
+                                ↺ リセット (自由記入も削除)
+                            </button>
+                            <div style="font-size:0.9rem;">カード点: <b>{{ currentDraftScore }}</b></div>
+                        </div>
+                    </div>
+
+                    <div v-if="!hasSubmitted">
+                        <!-- 自由記入欄 (1回制限) -->
+                        <div class="free-input-area">
+                            <div style="font-size:0.8rem; font-weight:bold; margin-bottom:5px;">
+                                🖊️ 自由記入 (1枚だけ作れます)
+                            </div>
+                            <div v-if="!hasCreatedFreeCard">
+                                <div class="radio-group">
+                                    <label><input type="radio" v-model="freeInputType" :value="5"> 5文字(上/下)</label>
+                                    <label><input type="radio" v-model="freeInputType" :value="7"> 7文字(中)</label>
+                                </div>
+                                <div class="input-row">
+                                    <input type="text" v-model="freeInputText" placeholder="好きな言葉"
+                                        style="flex-grow:1; padding:5px;">
+                                    <button class="btn btn-add" @click="addFreeCard"
+                                        :disabled="!freeInputText">追加</button>
+                                </div>
+                            </div>
+                            <div v-else style="font-size:0.85rem; color:#2e8b57; text-align:center;">
+                                ※ 自由記入カード作成済み
+                            </div>
+                        </div>
+
+                        <!-- 手札リスト -->
+                        <div class="hand-section">
+                            <div class="hand-label">【五文字】タップで上・下にセット</div>
+                            <div class="card-list">
+                                <div v-for="card in myHand.fives" :key="card.id" class="word-card"
+                                    :class="getCardClass(card)" @click="selectFive(card)">
+                                    {{ card.text }}
+                                    <span class="point-badge">{{ card.score }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hand-section" style="margin-top:15px;">
+                            <div class="hand-label">【七文字】タップで中にセット</div>
+                            <div class="card-list">
+                                <div v-for="card in myHand.sevens" :key="card.id" class="word-card"
+                                    :class="getCardClass(card)" @click="selectSeven(card)">
+                                    {{ card.text }}
+                                    <span class="point-badge">{{ card.score }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top:20px;" @click="submitHaiku"
+                            :disabled="!myDraft.top || !myDraft.middle || !myDraft.bottom">
+                            詠む（提出）
+                        </button>
+                    </div>
+                    <div v-else class="card-box" style="text-align:center;">
+                        <p>提出完了！<br>親の選評を待っています...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B. 選評タイム -->
+            <div v-if="gamePhase === 'JUDGING'">
+                <div class="card-box" style="text-align:center;">
+                    <h3>選評タイム</h3>
+                    <p v-if="isMeMaster && !settings.everyonePlays">グッときた順に順位をつけてください</p>
+                    <p v-else-if="settings.everyonePlays">全員で好きな句にいいねしましょう！</p>
+                    <p v-else>親が選考中です…</p>
+
+                    <!-- 全体のいいね状況 -->
+                    <div
+                        style="background:#fff0f5; padding:5px; border-radius:4px; margin-top:5px; border:1px solid #ffb6c1; font-size:0.9rem;">
+                        ❤️ 全員のいいね状況: <strong>{{ likedCount }} / {{ likeTargetCount }}</strong> 人
+                    </div>
+
+                    <!-- いいね進捗表示（親以外の参加者向け） -->
+                    <div v-if="!isMeMaster || settings.everyonePlays"
+                        style="margin-top:10px; padding:10px; background:#fff0f5; border-radius:8px; border:1px solid #ffb6c1;">
+                        <div v-if="hasLikedAny" style="color:#28a745; font-weight:bold;">
+                            ✅ いいね済み！（1句選択完了）
+                        </div>
+                        <div v-else style="color:#dc3545; font-weight:bold;">
+                            ⚠️ いいね必須！1句だけ❤️を押してください
+                        </div>
+                    </div>
+                </div>
+
+                <div v-for="haiku in sortedHaikusForJudging" :key="haiku.id" class="tanzaku">
+                    <div style="font-size:1.2rem; font-weight:bold; text-align:center; margin-bottom:5px;">
+                        <span :style="{color: haiku.top.isOni ? 'purple' : 'inherit'}">{{ haiku.top.text }}</span>　
+                        <span :style="{color: haiku.middle.isOni ? 'purple' : 'inherit'}">{{ haiku.middle.text
+                            }}</span>　
+                        <span :style="{color: haiku.bottom.isOni ? 'purple' : 'inherit'}">{{ haiku.bottom.text }}</span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#888;">
+                        <span>カード点: {{ haiku.cardScore }}</span>
+                        <span>詠み人知らず</span>
+                    </div>
+
+                    <div v-if="isMeMaster && !settings.everyonePlays"
+                        style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px; text-align:center;">
+                        <button v-for="r in [1,2,3]" :key="r" @click="setRank(haiku, r)"
+                            :style="{background: (tempRankState[haiku.id] === r) ? 'var(--accent-color)' : '#ccc', color:'white', border:'none', padding:'5px 10px', margin:'0 3px', borderRadius:'4px'}">
+                            {{ r }}位
+                        </button>
+                    </div>
+                    <!-- いいねボタン（自分の俳句以外、かつまだいいねしていない場合のみ押せる） -->
+                    <div v-else-if="haiku.userId !== myUid" style="text-align:right; margin-top:5px;">
+                        <button @click="toggleLike(haiku)"
+                            :disabled="hasLikedAny && !(haiku.likes && haiku.likes.includes(myUid))" :style="{
+                                background: (haiku.likes && haiku.likes.includes(myUid)) ? '#e91e63' : 'none',
+                                color: (haiku.likes && haiku.likes.includes(myUid)) ? 'white' : '#333',
+                                border: '1px solid #ccc',
+                                borderRadius: '15px',
+                                padding: '5px 15px',
+                                cursor: (hasLikedAny && !(haiku.likes && haiku.likes.includes(myUid))) ? 'not-allowed' : 'pointer',
+                                opacity: (hasLikedAny && !(haiku.likes && haiku.likes.includes(myUid))) ? '0.5' : '1'
+                            }">
+                            {{ (haiku.likes && haiku.likes.includes(myUid)) ? '❤️ いいね済（取消可）' : '🤍 いいね' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 親の強制進行ボタン -->
+                <div v-if="isMeMaster" style="margin-top:20px;">
+                    <button class="btn btn-primary" @click="finalizeJudging" :disabled="!canFinalize">
+                        {{ settings.everyonePlays ? '集計して結果発表へ' : '順位決定・発表' }}
+                    </button>
+                    <button class="btn btn-danger" style="margin-top:10px;"
+                        @click="forceFinalize">強制進行（いいね未完了でも進む）</button>
+                </div>
+            </div>
+
+            <!-- C. 結果発表 -->
+            <div v-if="gamePhase === 'RESULT'">
+                <div class="card-box" style="text-align:center; background:var(--sub-color); color:#fff;">
+                    <h3>結果発表</h3>
+                </div>
+
+                <div v-for="(haiku, index) in sortedHaikusForDisplay" :key="haiku.id" class="tanzaku"
+                    v-show="visibleResultCount >= (sortedHaikusForDisplay.length - index)">
+
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span v-if="!settings.showScore" class="rank-badge"
+                                style="background:#eee; color:#666;">発表</span>
+                            <span v-else-if="(haiku.rank || haiku._virtualRank)===1" class="rank-badge"
+                                style="background:var(--gold-color);">1位
+                                {{ settings.everyonePlays ? '' : '(100pt)' }}</span>
+                            <span v-else-if="(haiku.rank || haiku._virtualRank)===2" class="rank-badge"
+                                style="background:silver;">2位
+                                {{ settings.everyonePlays ? '' : '(60pt)' }}</span>
+                            <span v-else-if="(haiku.rank || haiku._virtualRank)===3" class="rank-badge"
+                                style="background:#ad8a80;">3位
+                                {{ settings.everyonePlays ? '' : '(20pt)' }}</span>
+                            <span v-else class="rank-badge" style="background:#eee; color:#666;">
+                                {{ (haiku.rank || haiku._virtualRank) ? (haiku.rank || haiku._virtualRank) + '位' : '圏外'
+                                }}
+                            </span>
+                        </div>
+                        <div style="font-size:0.8rem;">
+                            <!-- 点数表示ONの場合: 詳細計算式 -->
+                            <span v-if="settings.showScore">
+                                カード:{{ haiku.cardScore }} + <span v-if="!settings.everyonePlays">順位:{{
+                                    getRankScore(haiku.rank) }} + </span>
+                                <span style="color:#e91e63;">❤️:{{ (haiku.likes ? haiku.likes.length : 0) *
+                                    settings.likePoints }}</span> =
+                                <b>{{ haiku.totalScore }}pt</b>
+                            </span>
+                            <!-- 点数表示OFFの場合: シンプル表示 -->
+                            <span v-else>
+                                <span style="color:#e91e63; font-weight:bold; font-size:1rem;">❤️ {{ (haiku.likes ?
+                                    haiku.likes.length : 0) }}</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="font-size:1.2rem; font-weight:bold; text-align:center; margin:10px 0;">
+                        {{ haiku.top.text }}　{{ haiku.middle.text }}　{{ haiku.bottom.text }}
+                    </div>
+                    <div style="text-align:right; font-weight:bold; color:var(--sub-color);">
+                        詠：{{ getPlayerName(haiku.userId) }}
+                    </div>
+                </div>
+
+                <div v-if="isMeMaster && isResultAnimationDone" style="margin-top:20px;">
+                    <button class="btn btn-primary" @click="nextRound">次の句へ</button>
+                </div>
+                <div v-if="!isMeMaster && isResultAnimationDone" style="margin-top:20px; text-align:center;">
+                    <p>次の展開を待っています...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 最終結果 -->
+        <div v-else-if="viewState === 'FINISHED'" class="card-box" style="text-align:center;">
+            <h2>最終結果</h2>
+            <div v-for="(p, i) in sortedPlayers" :key="p.uid" class="score-row">
+                <span>
+                    <span v-if="settings.showScore">{{ i+1 }}位 </span>
+                    {{ p.name }}
+                    <span class="heart-count">❤️ {{ p.totalLikes || 0 }}</span>
+                    <!-- 優勝バッジ＆回数表示 -->
+                    <span v-if="p.winCount && p.winCount > 0" class="win-badge">
+                        <img src="./haiku_badge.png" class="win-icon" alt="🏆"> {{ p.winCount }}回優勝
+                    </span>
+                </span>
+                <strong v-if="settings.showScore">{{ p.score }} pt</strong>
+            </div>
+            <br>
+            <br>
+            <div v-if="isMeMaster">
+                <button class="btn btn-primary" @click="startNextGame">次のゲームを設定する</button>
+            </div>
+            <div v-else>
+                <p>親が次のゲームを開始するのを待っています...</p>
+            </div>
+            <div style="margin-top:15px;">
+                <button class="btn btn-danger" @click="leaveRoom">部屋を抜ける</button>
+            </div>
+            <div style="margin-top:15px;">
+                <button class="btn" style="background:#888; font-size:0.85rem;" @click="resetRoom">
+                    🗑️ ルーム情報を完全にリセット
+                </button>
+            </div>
+        </div>
+
+
+
+        <!-- デバッグメニュー -->
+        <!-- デバッグメニュー -->
+        <div class="debug-panel" v-if="viewState !== 'LOBBY' && isTestMode">
+            <div style="font-weight:bold; margin-bottom:5px;">🛠️ テスト/デバッグ</div>
+
+            <!-- プレイヤー切り替えタブ -->
+            <div class="debug-tabs">
+                <div v-for="p in players" :key="p.uid" class="debug-tab" :class="{ active: p.uid === myUid }"
+                    @click="switchPlayer(p.uid)">
+                    {{ p.name }}
+                </div>
+            </div>
+
+            <div v-if="viewState === 'WAITING'">
+                <button class="debug-btn" @click="add3NPCs">🤖 NPCを3人追加</button>
+            </div>
+
+            <div style="margin-top:5px; border-top:1px solid #555; padding-top:5px;">
+                <div style="font-size:0.7rem;">現在の視点: <span style="font-weight:bold; color:#e91e63;">{{
+                        getPlayerName(myUid)
+                        }}</span></div>
+                <button class="debug-btn" @click="npcSubmitAll" v-if="gamePhase === 'WRITING'">📝 他全員提出(強制)</button>
+                <button class="debug-btn" @click="npcLikeAll" v-if="gamePhase === 'JUDGING'">❤️ 他全員いいね(強制)</button>
+                <button class="debug-btn" @click="npcMasterJudge"
+                    v-if="gamePhase === 'JUDGING' && masterUid && masterUid.startsWith('npc-')">👑
+                    NPC親投票＆完了(強制)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue & Firebase Logic -->
+    <script type="module">
+        import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            getFirestore, collection, doc, getDoc, setDoc, updateDoc,
+            onSnapshot, addDoc, arrayUnion, increment, writeBatch, deleteDoc, getDocs
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        // ここにあなたのFirebase Configを貼り付けてください！
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQk8FAwozz34jdqoW6wxFqeneaOtA_AP4",
+            authDomain: "word-wolf-1432f.firebaseapp.com",
+            databaseURL: "https://word-wolf-1432f-default-rtdb.firebaseio.com",
+            projectId: "word-wolf-1432f",
+            storageBucket: "word-wolf-1432f.firebasestorage.app",
+            messagingSenderId: "777084245986",
+            appId: "1:777084245986:web:a6976ec8ee22a110dbcbbb"
+        };
+
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Firebase Init Error:", e);
+        }
+
+        // --- 辞書データ ---
+        const WORD_DICTIONARY = [
+            // 【5文字 (上/下)】通常1点, スパイス2-3点, 鬼10点
+            { text: "夢の中", type: 5, score: 1, isOni: false },
+            { text: "お風呂場で", type: 5, score: 1, isOni: false },
+            { text: "全裸待機", type: 5, score: 10, isOni: true },
+            { text: "即落ちで", type: 5, score: 10, isOni: true },
+            { text: "バブみある", type: 5, score: 10, isOni: true },
+            { text: "触手攻め", type: 5, score: 10, isOni: true },
+
+            // 【7文字 (中)】
+            { text: "声が漏れちゃう", type: 7, score: 3, isOni: false },
+            { text: "汗ばんだ肌", type: 7, score: 2, isOni: false },
+            { text: "スカートまくり", type: 7, score: 3, isOni: false },
+            { text: "壁に押し付け", type: 7, score: 2, isOni: false },
+            { text: "耳元で言う", type: 7, score: 2, isOni: false },
+            { text: "理性が飛んで", type: 7, score: 3, isOni: false },
+            { text: "ギリギリ見えた", type: 7, score: 2, isOni: false },
+            { text: "絶対服従", type: 7, score: 3, isOni: false },
+            { text: "限界すぎて", type: 7, score: 2, isOni: false },
+            { text: "絶頂迎える", type: 7, score: 3, isOni: false },
+            { text: "社会の窓が", type: 7, score: 10, isOni: true },
+
+            // --- 【追加分】5文字 (上/下) ---
+            // <日常・シチュエーション: 1点>
+            { text: "体育館", type: 5, score: 1, isOni: false },
+            { text: "会社にて", type: 5, score: 1, isOni: false },
+            { text: "エレベーター", type: 5, score: 1, isOni: false },
+            { text: "終電で", type: 5, score: 1, isOni: false },
+            { text: "雨の中", type: 5, score: 1, isOni: false },
+            { text: "飲み会で", type: 5, score: 1, isOni: false },
+            { text: "ピンサロで", type: 5, score: 1, isOni: false },
+            { text: "文化祭", type: 5, score: 1, isOni: false },
+
+            // <スパイス（性癖・感情）: 2-3点>
+            { text: "団地妻", type: 5, score: 2, isOni: false },
+            { text: "泣き叫ぶ", type: 5, score: 2, isOni: false },
+            { text: "踏んでくれ", type: 5, score: 3, isOni: false },
+            { text: "首輪つけ", type: 5, score: 3, isOni: false },
+            { text: "ムッチムチ", type: 5, score: 2, isOni: false },
+            { text: "主従関係", type: 5, score: 3, isOni: false }, // じゅ(1)じゅう(2)かん(2)けい(2) ※リズム的に許容範囲
+            { text: "洗脳済", type: 5, score: 3, isOni: false },
+            { text: "四つん這い", type: 5, score: 3, isOni: false },
+            { text: "肉便器", type: 5, score: 2, isOni: false },
+            { text: "寝取られて", type: 5, score: 3, isOni: false },
+            { text: "推しの子が", type: 5, score: 2, isOni: false },
+            { text: "催眠で", type: 5, score: 3, isOni: false },
+            { text: "無表情", type: 5, score: 2, isOni: false },
+            { text: "高笑い", type: 5, score: 2, isOni: false },
+            { text: "生配信", type: 5, score: 2, isOni: false },
+            { text: "乳首責め", type: 5, score: 2, isOni: false },
+            { text: "百合えっち", type: 5, score: 2, isOni: false },
+            { text: "お嬢様", type: 5, score: 2, isOni: false },
+            { text: "ビデオレター", type: 5, score: 2, isOni: false },
+            { text: "美人秘書", type: 5, score: 2, isOni: false },
+            { text: "おじチンポ", type: 5, score: 2, isOni: false },
+            { text: "ショタちんこ", type: 5, score: 2, isOni: false },
+            { text: "初体験", type: 5, score: 2, isOni: false },
+            { text: "筆おろし", type: 5, score: 2, isOni: false },
+            { text: "断面図", type: 5, score: 2, isOni: false },
+            { text: "着衣えろ", type: 5, score: 2, isOni: false },
+            { text: "親子丼", type: 5, score: 2, isOni: false },
+            { text: "感覚遮断", type: 5, score: 2, isOni: false },
+            { text: "ぶっともも", type: 5, score: 2, isOni: false },
+            { text: "うわキッツ", type: 5, score: 2, isOni: false },
+            { text: "フル勃起", type: 5, score: 2, isOni: false },
+            { text: "モブおじさん", type: 5, score: 2, isOni: false },
+            { text: "エロ睡眠", type: 5, score: 2, isOni: false },
+            { text: "姫はじめ", type: 5, score: 2, isOni: false },
+            { text: "うわデッカ", type: 5, score: 3, isOni: false },
+            { text: "年齢差", type: 5, score: 2, isOni: false },
+            { text: "地味眼鏡", type: 5, score: 3, isOni: false },
+            { text: "体格差", type: 5, score: 2, isOni: false },
+            { text: "経産婦", type: 5, score: 2, isOni: false },
+            { text: "発情期", type: 5, score: 2, isOni: false },
+            { text: "オナホばれ", type: 5, score: 5, isOni: false },
+            { text: "押し倒し", type: 5, score: 2, isOni: false },
+            { text: "行きずりの", type: 5, score: 2, isOni: false },
+            { text: "バイアグラ", type: 5, score: 2, isOni: false },
+            { text: "パイズリで", type: 5, score: 2, isOni: false },
+            { text: "立ちバック", type: 5, score: 2, isOni: false },
+            { text: "旦那様", type: 5, score: 2, isOni: false },
+            { text: "イケメンと", type: 5, score: 5, isOni: false },
+            { text: "おパンティ", type: 5, score: 2, isOni: false },
+            { text: "ど変態", type: 5, score: 2, isOni: false },
+            { text: "今日しよう❤", type: 5, score: 2, isOni: false },
+            { text: "中でいいよ❤", type: 5, score: 2, isOni: false },
+            { text: "パン❤パン❤パン❤", type: 5, score: 2, isOni: false },
+            { text: "Oh.YES", type: 5, score: 5, isOni: false },
+            { text: "どびゅるるる", type: 5, score: 3, isOni: false },
+            { text: "ぐっちょぐちょ", type: 5, score: 2, isOni: false },
+            { text: "ぶぼぼもわぁ", type: 5, score: 8, isOni: false },
+            { text: "おまんこに", type: 5, score: 2, isOni: false },
+            { text: "ケツを出せ", type: 5, score: 5, isOni: false },
+            { text: "風俗嬢", type: 5, score: 2, isOni: false },
+            { text: "交尾中", type: 5, score: 2, isOni: false },
+            { text: "や・ら・な・い・か", type: 5, score: 8, isOni: false },
+            { text: "風俗嬢", type: 5, score: 2, isOni: false },
+            { text: "女王様", type: 5, score: 2, isOni: false },
+            { text: "拘束具", type: 5, score: 5, isOni: false },
+            { text: "色仕掛け", type: 5, score: 2, isOni: false },
+            { text: "言葉責め", type: 5, score: 2, isOni: false },
+            { text: "誘い受け", type: 5, score: 2, isOni: false },
+            { text: "VTuber", type: 5, score: 5, isOni: false },
+            { text: "ぬるっぬる", type: 5, score: 3, isOni: false },
+            { text: "ヌぷぷぷぷッ", type: 5, score: 7, isOni: false },
+            { text: "ちんあなご", type: 5, score: 2, isOni: false },
+            { text: "一時間", type: 5, score: 2, isOni: false },
+            { text: "スケベ椅子", type: 5, score: 2, isOni: false },
+            { text: "隠し撮り", type: 5, score: 4, isOni: false },
+            { text: "まんこくぱぁ", type: 5, score: 2, isOni: false },
+            { text: "露出狂", type: 5, score: 2, isOni: false },
+            { text: "エネマグラ", type: 5, score: 5, isOni: false },
+            { text: "猿ぐつわ", type: 5, score: 2, isOni: false },
+            { text: "不倫行為", type: 5, score: 2, isOni: false },
+            { text: "あん❤あん❤あん❤", type: 5, score: 2, isOni: false },
+
+            // <鬼札（高得点・インパクト）: 10点>
+            { text: "デスアクメ", type: 5, score: 10, isOni: true },
+            { text: "ケツアクメ", type: 5, score: 10, isOni: true },
+            { text: "フル勃起", type: 5, score: 10, isOni: true },
+            { text: "黒歴史", type: 5, score: 10, isOni: true },
+            { text: "ザコまんこ", type: 5, score: 10, isOni: true },
+            { text: "尊厳破壊", type: 5, score: 10, isOni: true },
+            { text: "鬱勃起", type: 5, score: 10, isOni: true },
+            { text: "二穴責め", type: 5, score: 10, isOni: true },
+            { text: "授乳コキ", type: 5, score: 10, isOni: true },
+            { text: "逆レイプ", type: 5, score: 10, isOni: true },
+            { text: "無様エロ", type: 5, score: 10, isOni: true },
+            { text: "イマラチオ", type: 5, score: 10, isOni: true },
+            { text: "あんたバカぁ？", type: 5, score: 20, isOni: true },
+            { text: "ユニコーン！！", type: 5, score: 15, isOni: true },
+            { text: "やらせはせん", type: 5, score: 10, isOni: true },
+
+            // --- 【追加分】7文字 (中) ---
+            // <日常・シチュエーション: 1点>
+            { text: "脚ピンオナニー", type: 7, score: 1, isOni: false }, // 字余りだが勢い
+            { text: "分からせえっち", type: 7, score: 1, isOni: false },
+            { text: "寝取られ報告", type: 7, score: 1, isOni: false },
+            { text: "子作りえっち", type: 7, score: 1, isOni: false },
+            { text: "裸エプロン", type: 7, score: 1, isOni: false },
+
+            // <スパイス（性癖・感情）: 2-3点>
+            { text: "射精懇願", type: 7, score: 2, isOni: false },
+            { text: "陥没乳首", type: 7, score: 3, isOni: false },
+            { text: "射精管理で", type: 7, score: 3, isOni: false },
+            { text: "M字開脚", type: 7, score: 3, isOni: false },
+            { text: "連続絶頂", type: 7, score: 2, isOni: false },
+            { text: "絶叫痙攣", type: 7, score: 3, isOni: false },
+            { text: "おしっこ我慢", type: 7, score: 3, isOni: false },
+            { text: "ぴっちりスーツ", type: 7, score: 2, isOni: false },
+            { text: "睡眠アプリ", type: 7, score: 3, isOni: false },
+            { text: "感度千倍", type: 7, score: 3, isOni: false },
+            { text: "逆レイプ", type: 7, score: 2, isOni: false },
+            { text: "おちんぽみるく", type: 7, score: 5, isOni: false },
+            { text: "アナルセックス", type: 7, score: 5, isOni: false },
+            { text: "シックスナイン", type: 7, score: 5, isOni: false },
+            { text: "ニプルファック", type: 7, score: 2, isOni: false },
+            { text: "フィストファック", type: 7, score: 2, isOni: false },
+            { text: "口内射精", type: 7, score: 2, isOni: false },
+            { text: "援助交際", type: 7, score: 2, isOni: false },
+            { text: "複数プレイ", type: 7, score: 2, isOni: false },
+            { text: "顔面騎乗", type: 7, score: 2, isOni: false },
+            { text: "クンニリングス", type: 7, score: 2, isOni: false },
+            { text: "まんぐり返し", type: 7, score: 2, isOni: false },
+            { text: "オナホを使って", type: 7, score: 2, isOni: false },
+            { text: "隣の部屋で", type: 7, score: 2, isOni: false },
+            { text: "アヘ顔晒す", type: 7, score: 4, isOni: false },
+            { text: "ビデオ回して", type: 7, score: 2, isOni: false },
+            { text: "言いなりになる", type: 7, score: 2, isOni: false },
+            { text: "何度もイっちゃう", type: 7, score: 2, isOni: false },
+            { text: "ナカで暴れる", type: 7, score: 2, isOni: false },
+            { text: "ガマンできずに", type: 7, score: 2, isOni: false },
+            { text: "気持ちよすぎて", type: 7, score: 2, isOni: false },
+            { text: "奥まで届く", type: 7, score: 2, isOni: false },
+            { text: "腰が砕ける", type: 7, score: 3, isOni: false },
+            { text: "女を抱いて", type: 7, score: 2, isOni: false },
+            { text: "騎乗位キメて", type: 7, score: 4, isOni: false },
+            { text: "いちゃらぶえっち", type: 7, score: 3, isOni: false },
+            { text: "バキバキ童貞", type: 7, score: 6, isOni: false },
+            { text: "アナルなめなめ", type: 7, score: 5, isOni: false },
+            { text: "ピストン運動", type: 7, score: 2, isOni: false },
+            { text: "チンコを舐める", type: 7, score: 2, isOni: false },
+            { text: "がんばれ❤がんばれ❤", type: 7, score: 2, isOni: false },
+            { text: "ローションプレイ", type: 7, score: 2, isOni: false },
+            { text: "ローター散歩", type: 7, score: 4, isOni: false },
+            { text: "異物挿入", type: 7, score: 7, isOni: false },
+            { text: "バイブレーション", type: 7, score: 2, isOni: false },
+            { text: "スパンキングで", type: 7, score: 2, isOni: false },
+            { text: "ぽこちん蹴り上げ", type: 7, score: 9, isOni: false },
+            { text: "双頭ディルド", type: 7, score: 2, isOni: false },
+            { text: "即ハメえっち", type: 7, score: 2, isOni: false },
+            { text: "ワンナイトラブ", type: 7, score: 2, isOni: false },
+            { text: "数の子天井", type: 7, score: 2, isOni: false },
+            { text: "仮性包茎", type: 7, score: 2, isOni: false },
+            { text: "ドリルちんちん", type: 7, score: 5, isOni: false },
+            { text: "尻コキえっち", type: 7, score: 2, isOni: false },
+            { text: "足コキえっち", type: 7, score: 2, isOni: false },
+            { text: "パイズリえっち", type: 7, score: 2, isOni: false },
+            { text: "うるせぇ!!いこう!!", type: 7, score: 6, isOni: false },
+            { text: "心を燃やせ", type: 7, score: 5, isOni: false },
+            { text: "駅弁大好き❤", type: 7, score: 5, isOni: false },
+            { text: "ディープスロート", type: 7, score: 2, isOni: false },
+            { text: "一人尺八", type: 7, score: 2, isOni: false },
+            { text: "中出しセックス", type: 7, score: 2, isOni: false },
+            { text: "子作りセックス", type: 7, score: 4, isOni: false },
+            { text: "ピンクローター", type: 7, score: 2, isOni: false },
+            { text: "三角木馬", type: 7, score: 2, isOni: false },
+            { text: "オホ声響く", type: 7, score: 2, isOni: false },
+            { text: "一生懸命", type: 7, score: 2, isOni: false },
+            { text: "公衆面前", type: 7, score: 3, isOni: false },
+            { text: "公衆トイレ", type: 7, score: 3, isOni: false },
+            { text: "亀甲縛り", type: 7, score: 2, isOni: false },
+            { text: "チンカス香る", type: 7, score: 2, isOni: false },
+            { text: "ぽこちんフィーバー", type: 7, score: 6, isOni: false },
+            { text: "おしりを舐める", type: 7, score: 2, isOni: false },
+            { text: "子宮恋愛", type: 7, score: 2, isOni: false },
+            { text: "イク❤イク❤イっちゃう❤", type: 7, score: 6, isOni: false },
+            { text: "くぎ打ち騎乗位", type: 7, score: 4, isOni: false },
+            { text: "除毛プレイで", type: 7, score: 2, isOni: false },
+            { text: "拘束電マ", type: 7, score: 2, isOni: false },
+            { text: "高速ピストン", type: 7, score: 2, isOni: false },
+
+
+            // <鬼札（高得点・インパクト）: 10点>
+            { text: "種付けプレス", type: 7, score: 10, isOni: true }, // ガチャ用語
+            { text: "射精懇願", type: 7, score: 10, isOni: true },
+            { text: "大量失禁", type: 7, score: 10, isOni: true },
+            { text: "ふたなり巨乳", type: 7, score: 15, isOni: true },
+            { text: "チン媚ダンス", type: 7, score: 10, isOni: true },
+            { text: "だいしゅきホールド", type: 7, score: 10, isOni: true },
+            { text: "縦割れあなる", type: 7, score: 10, isOni: true },
+            { text: "濁点喘ぎ", type: 7, score: 10, isOni: true },
+            { text: "快楽拷問", type: 7, score: 10, isOni: true },
+            { text: "アヘ顔ダブピ", type: 7, score: 10, isOni: true },
+            { text: "まさか・・・暴走!?", type: 7, score: 20, isOni: true },
+
+        ];
+
+        // 配札ロジック (Util)
+        function generateHand() {
+            const fives = WORD_DICTIONARY.filter(w => w.type === 5);
+            const sevens = WORD_DICTIONARY.filter(w => w.type === 7);
+
+            const pick = (arr, count) => {
+                const shuffled = [...arr].sort(() => 0.5 - Math.random());
+                // IDを付与
+                return shuffled.slice(0, count).map(w => ({ ...w, id: Math.random().toString(36).substr(2, 9) }));
+            };
+
+            // 5文字10枚, 7文字5枚
+            return {
+                fives: pick(fives, 10),
+                sevens: pick(sevens, 5)
+            };
+        }
+
+        createApp({
+            data() {
+                return {
+                    viewState: 'LOBBY',
+                    gamePhase: 'WRITING',
+
+                    myPlayerName: '',
+                    roomId: '',
+                    myUid: '',
+
+                    players: [],
+                    masterHistory: [],
+                    roundCount: 1,
+                    masterUid: '',
+
+                    gameCount: 1,
+
+                    currentHaikus: [],
+                    myDraft: { top: null, middle: null, bottom: null },
+
+                    freeInputText: '',
+                    freeInputType: 5,
+
+                    isLoading: false,
+                    errorMessage: '',
+
+                    visibleResultCount: 0,
+                    isResultAnimationDone: false,
+                    tempRankState: {},
+
+                    unsubRoom: null,
+                    unsubHaikus: null,
+
+                    // 接続安定化用
+                    isReconnecting: false,
+                    connectionStatus: 'offline',
+                    connectionStatus: 'offline',
+                    lastError: null,
+
+                    isTestMode: false,
+
+                    // 設定・タイマー
+                    settings: {
+                        timeLimit: 300, // 秒
+                        showMaster: true,
+                        showScore: true,
+                        likePoints: 10,
+                        everyonePlays: false
+                    },
+                    tempSettings: { // 編集用
+                        timeLimitMin: 5,
+                        showMaster: true,
+                        showScore: true,
+                        likePoints: 10,
+                        everyonePlays: false
+                    },
+                    roundStartTime: null,
+                    timeLeft: 0,
+                    timerInterval: null
+                };
+            },
+            computed: {
+                isMeMaster() { return this.myUid === this.masterUid; },
+
+                myHand() {
+                    const p = this.players.find(x => x.uid === this.myUid);
+                    return p ? p.hand : { fives: [], sevens: [] };
+                },
+                hasCreatedFreeCard() {
+                    if (!this.myHand) return false;
+                    return (this.myHand.fives.some(c => c.isFree) || this.myHand.sevens.some(c => c.isFree));
+                },
+                currentDraftScore() {
+                    let s = 0;
+                    if (this.myDraft.top) s += this.myDraft.top.score;
+                    if (this.myDraft.middle) s += this.myDraft.middle.score;
+                    if (this.myDraft.bottom) s += this.myDraft.bottom.score;
+                    return s;
+                },
+                hasSubmitted() {
+                    return this.currentHaikus.some(h => h.userId === this.myUid);
+                },
+                submittedCount() {
+                    return this.currentHaikus.length;
+                },
+                canFinalize() {
+                    if (this.settings.everyonePlays) return true;
+                    const ranks = Object.values(this.tempRankState);
+                    const needed = Math.min(3, this.currentHaikus.length);
+                    return ranks.length >= needed;
+                },
+                sortedHaikusForJudging() {
+                    return [...this.currentHaikus].sort((a, b) => (a.randomSortKey || 0) - (b.randomSortKey || 0));
+                },
+                sortedHaikusForDisplay() {
+                    const hasRanks = this.currentHaikus.some(h => h.rank && h.rank > 0);
+                    if (this.settings.everyonePlays || !hasRanks) {
+                        const sorted = [...this.currentHaikus].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+                        return sorted.map((h, i) => ({ ...h, _virtualRank: i + 1 }));
+                    }
+                    return [...this.currentHaikus].sort((a, b) => (a.rank || 999) - (b.rank || 999));
+                },
+                sortedPlayers() {
+                    if (this.settings.showScore) {
+                        return [...this.players].sort((a, b) => b.score - a.score);
+                    }
+                    return this.players;
+                },
+                // 自分がいいねを既にしているか（1回制限チェック用）
+                hasLikedAny() {
+                    return this.currentHaikus.some(h => h.likes && h.likes.includes(this.myUid));
+                },
+                likedCount() {
+                    const uids = new Set();
+                    this.currentHaikus.forEach(h => {
+                        if (h.likes) {
+                            h.likes.forEach(uid => uids.add(uid));
+                        }
+                    });
+                    return uids.size;
+                },
+                likeTargetCount() {
+                    return this.settings.everyonePlays ? this.players.length : (this.players.length - 1);
+                }
+            },
+
+            // ページ読み込み時に自動復帰を試みる
+            async mounted() {
+                await this.tryAutoReconnect();
+            },
+
+            methods: {
+                // --- セッション管理 ---
+                saveSession() {
+                    const sessionData = {
+                        roomId: this.roomId,
+                        playerName: this.myPlayerName,
+                        uid: this.myUid,
+                        isTestMode: this.isTestMode,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('haikuGameSession', JSON.stringify(sessionData));
+                },
+
+                loadSession() {
+                    try {
+                        const saved = localStorage.getItem('haikuGameSession');
+                        if (!saved) return null;
+                        const session = JSON.parse(saved);
+                        // 24時間以内のセッションのみ有効
+                        if (Date.now() - session.timestamp > 24 * 60 * 60 * 1000) {
+                            localStorage.removeItem('haikuGameSession');
+                            return null;
+                        }
+                        return session;
+                    } catch (e) {
+                        return null;
+                    }
+                },
+
+                clearSession() {
+                    localStorage.removeItem('haikuGameSession');
+                },
+
+                // --- 自動復帰（ページリロード対応） ---
+                async tryAutoReconnect() {
+                    const session = this.loadSession();
+                    if (!session) return false;
+
+                    this.isReconnecting = true;
+                    this.connectionStatus = 'reconnecting';
+
+                    try {
+                        // Firebase認証状態を確認・復帰
+                        const userCred = await signInAnonymously(auth);
+                        this.myUid = userCred.user.uid;
+
+                        // 部屋が存在するか確認
+                        const roomRef = doc(db, "rooms", session.roomId);
+                        const roomSnap = await getDoc(roomRef);
+
+                        if (roomSnap.exists()) {
+                            const data = roomSnap.data();
+                            // 自分がまだ部屋にいるか確認（UIDまたは名前で照合）
+                            let myPlayer = data.players.find(p => p.uid === session.uid);
+                            if (!myPlayer) {
+                                myPlayer = data.players.find(p => p.name === session.playerName);
+                            }
+
+                            if (myPlayer) {
+                                this.roomId = session.roomId;
+                                this.myPlayerName = myPlayer.name;
+                                this.myUid = myPlayer.uid;
+                                this.isTestMode = session.isTestMode || false;
+
+                                // セッション更新
+                                this.saveSession();
+
+                                this.startRoomListener();
+                                this.viewState = 'GAME';
+                                this.connectionStatus = 'online';
+                                this.isReconnecting = false;
+                                console.log('セッション復帰成功');
+                                return true;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('自動復帰失敗:', e);
+                    }
+
+                    this.isReconnecting = false;
+                    this.connectionStatus = 'offline';
+                    this.clearSession();
+                    return false;
+                },
+
+                // --- ロビー機能 ---
+                async enterRoom() {
+                    if (!db) { this.errorMessage = "Firebase設定がありません"; return; }
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.lastError = null;
+
+                    try {
+                        const userCred = await signInAnonymously(auth);
+                        this.myUid = userCred.user.uid;
+
+                        const roomRef = doc(db, "rooms", this.roomId);
+                        const roomSnap = await getDoc(roomRef);
+
+                        const initialHand = generateHand();
+                        const newPlayer = {
+                            uid: this.myUid,
+                            name: this.myPlayerName,
+                            score: 0,
+                            totalLikes: 0,
+                            winCount: 0, // 優勝回数初期化
+                            hand: initialHand
+                        };
+
+                        if (!roomSnap.exists()) {
+                            // 新規作成
+                            await setDoc(roomRef, {
+                                roomId: this.roomId,
+                                status: 'WAITING', // 待機状態からスタート
+                                gameCount: 1,
+                                roundCount: 1,
+                                masterUid: this.myUid,
+                                masterHistory: [this.myUid],
+                                players: [newPlayer],
+                                settings: {
+                                    timeLimit: 300,
+                                    showMaster: true,
+                                    showMaster: true,
+                                    showScore: true,
+                                    likePoints: 10,
+                                    everyonePlays: false
+                                },
+                                roundStartTime: null
+                            });
+                        } else {
+                            // 参加
+                            const data = roomSnap.data();
+                            const existing = data.players.find(p => p.uid === this.myUid);
+                            if (!existing) {
+                                await updateDoc(roomRef, {
+                                    players: arrayUnion(newPlayer)
+                                });
+                            }
+                        }
+
+                        // セッション保存
+                        this.saveSession();
+                        this.connectionStatus = 'online';
+
+                        this.startRoomListener();
+                        // viewStateはリスナーのstatusを見て更新されるのでここでは仮設定しない、
+                        // またはWAITINGとしておく
+                        this.viewState = 'WAITING';
+
+                    } catch (e) {
+                        console.error(e);
+                        this.errorMessage = "エラー: " + e.message;
+                        this.lastError = e;
+                        this.connectionStatus = 'offline';
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                // --- Firestore監視（リスナー重複防止付き） ---
+                startRoomListener() {
+                    // 既存のリスナーがあれば解除（重複防止）
+                    if (this.unsubRoom) {
+                        this.unsubRoom();
+                        this.unsubRoom = null;
+                    }
+                    if (this.unsubHaikus) {
+                        this.unsubHaikus();
+                        this.unsubHaikus = null;
+                    }
+
+                    // Room監視
+                    this.unsubRoom = onSnapshot(doc(db, "rooms", this.roomId), (docSnap) => {
+                        if (!docSnap.exists()) return;
+                        const data = docSnap.data();
+
+                        this.players = data.players || [];
+                        this.roundCount = data.roundCount;
+                        this.masterUid = data.masterUid;
+                        this.masterHistory = data.masterHistory || [];
+                        this.gameCount = data.gameCount || 1;
+                        this.connectionStatus = 'online';
+                        this.roundStartTime = data.roundStartTime || null;
+
+                        console.log('Room update:', data); // DEBUG
+                        console.log('Current Phase:', this.gamePhase, 'New Status:', data.status); // DEBUG
+
+                        // 設定同期
+                        if (data.settings) {
+                            this.settings = {
+                                timeLimit: 300,
+                                showMaster: true,
+                                showScore: true,
+                                likePoints: 10,
+                                everyonePlays: false,
+                                ...data.settings
+                            };
+                            // 編集用変数にも反映（自分がホストで編集中でない場合...は難しいので、とりあえず同期）
+                            // 自分が編集中の場合、ループしないように少し工夫が必要だが、
+                            // 今回は単純に同期する（他人が変えることはない前提）
+                            if (!this.isMeMaster) {
+                                // 閲覧者は常にDBの値を見る
+                            } else {
+                                // ホストもDBの値が正だが、UI入力用に変換
+                                // ※入力中はここが頻繁に更新されると使いにくいが、
+                                // DB更新はchangeイベントで行うので、そこまで競合しない
+                                // this.tempSettings.timeLimitMin = Math.floor(this.settings.timeLimit / 60);
+                                // this.tempSettings.showMaster = this.settings.showMaster;
+                                // this.tempSettings.likePoints = this.settings.likePoints;
+                            }
+                        }
+
+                        // ステータス変化検知
+                        if (this.gamePhase !== data.status) {
+                            const oldPhase = this.gamePhase;
+                            this.gamePhase = data.status;
+
+                            if (this.gamePhase === 'FINISHED') {
+                                this.viewState = 'FINISHED';
+                            } else if (this.gamePhase === 'WAITING') {
+                                this.viewState = 'WAITING';
+                                // ロビーに戻ったらtempSettingsも初期化
+                                if (this.settings) {
+                                    this.tempSettings.timeLimitMin = Math.floor(this.settings.timeLimit / 60);
+                                    this.tempSettings.showMaster = this.settings.showMaster;
+                                    this.tempSettings.showMaster = this.settings.showMaster;
+                                    this.tempSettings.likePoints = this.settings.likePoints;
+                                    this.tempSettings.everyonePlays = this.settings.everyonePlays;
+                                }
+                            } else {
+                                this.viewState = 'GAME';
+                            }
+
+                            if (this.gamePhase === 'WRITING') {
+                                this.myDraft = { top: null, middle: null, bottom: null };
+                                this.isResultAnimationDone = false;
+                                this.tempRankState = {};
+                                // タイマー開始
+                                this.startTimer();
+                            } else {
+                                this.stopTimer();
+                            }
+
+                            if (this.gamePhase === 'RESULT') {
+                                this.playResultAnimation();
+                            }
+                        } else {
+                            // フェーズが変わらなくても時刻同期などでタイマー調整が必要かも
+                            if (this.gamePhase === 'WRITING') {
+                                this.startTimer();
+                            }
+                        }
+                    }, (error) => {
+                        console.error('Room listener error:', error);
+                        this.connectionStatus = 'offline';
+                        this.lastError = error;
+                    });
+
+                    // 俳句監視
+                    const haikusRef = collection(db, "rooms", this.roomId, "haikus");
+                    this.unsubHaikus = onSnapshot(haikusRef, (snapshot) => {
+                        const allHaikus = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                        this.currentHaikus = allHaikus.filter(h =>
+                            h.gameCount === this.gameCount &&
+                            h.round === this.roundCount
+                        );
+
+                        // 自動進行チェック
+                        const isMasterNPC = this.masterUid && this.masterUid.startsWith('npc-');
+                        if ((this.isMeMaster || isMasterNPC) && this.gamePhase === 'WRITING') {
+                            const writers = this.settings.everyonePlays
+                                ? this.players
+                                : this.players.filter(p => p.uid !== this.masterUid);
+                            if (writers.length > 0 && this.currentHaikus.length >= writers.length) {
+                                updateDoc(doc(db, "rooms", this.roomId), { status: 'JUDGING' });
+                            }
+                        }
+                    }, (error) => {
+                        console.error('Haikus listener error:', error);
+                    });
+                },
+
+                // --- UI表示用クラス ---
+                getCardClass(card) {
+                    return {
+                        oni: card.isOni,
+                        free: card.isFree,
+                        selected: this.isCardSelected(card)
+                    };
+                },
+                getSlotClass(card) {
+                    if (!card) return {};
+                    return { filled: true, oni: card.isOni, free: card.isFree };
+                },
+
+                // --- 詠唱アクション ---
+                isCardSelected(card) {
+                    const d = this.myDraft;
+                    return (d.top && d.top.id === card.id) ||
+                        (d.middle && d.middle.id === card.id) ||
+                        (d.bottom && d.bottom.id === card.id);
+                },
+                selectFive(card) {
+                    if (!this.myDraft.top) this.myDraft.top = card;
+                    else if (!this.myDraft.bottom) this.myDraft.bottom = card;
+                    else this.myDraft.top = card;
+                },
+                selectSeven(card) {
+                    this.myDraft.middle = card;
+                },
+                removePart(part) {
+                    this.myDraft[part] = null;
+                },
+
+                // --- 自由記入追加 ---
+                async addFreeCard() {
+                    if (!this.freeInputText) return;
+
+                    const newCard = {
+                        id: 'free-' + Date.now(),
+                        text: this.freeInputText,
+                        type: this.freeInputType,
+                        score: 1,
+                        isOni: false,
+                        isFree: true
+                    };
+
+                    const myIdx = this.players.findIndex(p => p.uid === this.myUid);
+                    if (myIdx === -1) return;
+
+                    const updatedPlayers = [...this.players];
+                    const myHand = { ...updatedPlayers[myIdx].hand };
+
+                    if (this.freeInputType === 5) {
+                        myHand.fives = [newCard, ...myHand.fives];
+                    } else {
+                        myHand.sevens = [newCard, ...myHand.sevens];
+                    }
+
+                    updatedPlayers[myIdx].hand = myHand;
+
+                    await updateDoc(doc(db, "rooms", this.roomId), { players: updatedPlayers });
+                    this.freeInputText = '';
+                },
+
+                // --- リセット ---
+                async resetDraft() {
+                    let needDbUpdate = false;
+                    const myIdx = this.players.findIndex(p => p.uid === this.myUid);
+                    if (myIdx === -1) {
+                        this.myDraft = { top: null, middle: null, bottom: null };
+                        return;
+                    }
+
+                    let updatedPlayers = [...this.players];
+                    let myHand = { ...updatedPlayers[myIdx].hand };
+
+                    // 手札内の自由記入カードを全て削除
+                    const originalFivesCount = myHand.fives.length;
+                    const originalSevensCount = myHand.sevens.length;
+
+                    myHand.fives = myHand.fives.filter(c => !c.isFree);
+                    myHand.sevens = myHand.sevens.filter(c => !c.isFree);
+
+                    if (myHand.fives.length !== originalFivesCount || myHand.sevens.length !== originalSevensCount) {
+                        needDbUpdate = true;
+                    }
+
+                    if (needDbUpdate) {
+                        updatedPlayers[myIdx].hand = myHand;
+                        await updateDoc(doc(db, "rooms", this.roomId), { players: updatedPlayers });
+                    }
+
+                    this.myDraft = { top: null, middle: null, bottom: null };
+                },
+
+                async submitHaiku() {
+                    if (!this.myDraft.top) return;
+                    const cardScore = this.myDraft.top.score + this.myDraft.middle.score + this.myDraft.bottom.score;
+
+                    await addDoc(collection(db, "rooms", this.roomId, "haikus"), {
+                        userId: this.myUid,
+                        top: this.myDraft.top,
+                        middle: this.myDraft.middle,
+                        bottom: this.myDraft.bottom,
+                        gameCount: this.gameCount,
+                        round: this.roundCount,
+                        rank: 0,
+                        likes: [],
+                        cardScore: cardScore,
+                        bonusScore: 0,
+                        totalScore: 0,
+                        randomSortKey: Math.random()
+                    });
+                },
+
+                // --- 強制進行 ---
+                async forceAllSubmit() {
+                    const batch = writeBatch(db);
+                    const haikusRef = collection(db, "rooms", this.roomId, "haikus");
+
+                    const unsubmittedPlayers = this.players.filter(p => {
+                        if (!this.settings.everyonePlays && p.uid === this.masterUid) return false;
+                        return !this.currentHaikus.find(h => h.userId === p.uid);
+                    });
+
+                    unsubmittedPlayers.forEach(p => {
+                        const topCands = p.hand.fives.filter(c => !c.isFree);
+                        const top = topCands[Math.floor(Math.random() * topCands.length)];
+
+                        const midCands = p.hand.sevens.filter(c => !c.isFree);
+                        const middle = midCands[Math.floor(Math.random() * midCands.length)];
+
+                        const botCands = topCands.filter(c => c.id !== top.id);
+                        const bottom = botCands.length > 0 ? botCands[Math.floor(Math.random() * botCands.length)] : top;
+
+                        const cardScore = top.score + middle.score + bottom.score;
+
+                        const newDocRef = doc(haikusRef);
+                        batch.set(newDocRef, {
+                            userId: p.uid,
+                            top, middle, bottom,
+                            gameCount: this.gameCount,
+                            round: this.roundCount,
+                            rank: 0, likes: [], cardScore, bonusScore: 0, totalScore: 0,
+                            randomSortKey: Math.random()
+                        });
+                    });
+
+                    await batch.commit();
+                    setTimeout(() => {
+                        updateDoc(doc(db, "rooms", this.roomId), { status: 'JUDGING' });
+                    }, 500);
+                },
+
+                // --- 選評アクション ---
+                setRank(haiku, rank) {
+                    for (const [hid, r] of Object.entries(this.tempRankState)) {
+                        if (r === rank) delete this.tempRankState[hid];
+                    }
+                    this.tempRankState[haiku.id] = rank;
+                },
+
+                async toggleLike(haiku) {
+                    const haikuRef = doc(db, "rooms", this.roomId, "haikus", haiku.id);
+                    const isLiked = haiku.likes && haiku.likes.includes(this.myUid);
+
+                    if (isLiked) {
+                        const newLikes = haiku.likes.filter(uid => uid !== this.myUid);
+                        await updateDoc(haikuRef, { likes: newLikes });
+                    } else {
+                        await updateDoc(haikuRef, { likes: arrayUnion(this.myUid) });
+                    }
+                },
+
+                async finalizeJudging() {
+                    const batch = writeBatch(db);
+                    const roomRef = doc(db, "rooms", this.roomId);
+
+                    const scoreUpdates = {};
+                    const likeUpdates = {};
+                    this.players.forEach(p => { scoreUpdates[p.uid] = 0; likeUpdates[p.uid] = 0; });
+
+                    for (const h of this.currentHaikus) {
+                        const rank = this.tempRankState[h.id] || 0;
+
+                        let rankScore = 0;
+                        if (!this.settings.everyonePlays) {
+                            if (rank === 1) rankScore = 100;
+                            else if (rank === 2) rankScore = 60;
+                            else if (rank === 3) rankScore = 20;
+                        }
+
+                        const likeCount = h.likes ? h.likes.length : 0;
+                        const likeScore = likeCount * this.settings.likePoints;
+                        const bonusScore = rankScore + likeScore;
+                        const totalScore = (h.cardScore || 0) + bonusScore;
+
+                        const hRef = doc(db, "rooms", this.roomId, "haikus", h.id);
+                        batch.update(hRef, { rank, bonusScore, totalScore });
+
+                        if (scoreUpdates[h.userId] !== undefined) {
+                            scoreUpdates[h.userId] += totalScore;
+                            likeUpdates[h.userId] += likeCount;
+                        }
+                    }
+
+                    const newPlayers = this.players.map(p => {
+                        return {
+                            ...p,
+                            score: p.score + (scoreUpdates[p.uid] || 0),
+                            totalLikes: (p.totalLikes || 0) + (likeUpdates[p.uid] || 0)
+                        };
+                    });
+
+                    batch.update(roomRef, { players: newPlayers, status: 'RESULT' });
+
+                    await batch.commit();
+                },
+
+                // 強制進行（いいね未完了でも結果発表へ進む）
+                async forceFinalize() {
+                    const batch = writeBatch(db);
+                    const roomRef = doc(db, "rooms", this.roomId);
+
+                    const scoreUpdates = {};
+                    const likeUpdates = {};
+                    this.players.forEach(p => { scoreUpdates[p.uid] = 0; likeUpdates[p.uid] = 0; });
+
+                    for (const h of this.currentHaikus) {
+                        const rank = this.tempRankState[h.id] || 0;
+
+                        let rankScore = 0;
+                        if (rank === 1) rankScore = 100;
+                        else if (rank === 2) rankScore = 60;
+                        else if (rank === 3) rankScore = 20;
+
+                        const likeCount = h.likes ? h.likes.length : 0;
+                        const likeScore = likeCount * this.settings.likePoints;
+                        const bonusScore = rankScore + likeScore;
+                        const totalScore = (h.cardScore || 0) + bonusScore;
+
+                        const hRef = doc(db, "rooms", this.roomId, "haikus", h.id);
+                        batch.update(hRef, { rank, bonusScore, totalScore });
+
+                        if (scoreUpdates[h.userId] !== undefined) {
+                            scoreUpdates[h.userId] += totalScore;
+                            likeUpdates[h.userId] += likeCount;
+                        }
+                    }
+
+                    const newPlayers = this.players.map(p => {
+                        return {
+                            ...p,
+                            score: p.score + (scoreUpdates[p.uid] || 0),
+                            totalLikes: (p.totalLikes || 0) + (likeUpdates[p.uid] || 0)
+                        };
+                    });
+
+                    batch.update(roomRef, { players: newPlayers, status: 'RESULT' });
+
+                    await batch.commit();
+                },
+
+                getHaikuCardScore(haiku) {
+                    return haiku.top.score + haiku.middle.score + haiku.bottom.score;
+                },
+                getRankScore(rank) {
+                    if (rank === 1) return 100;
+                    if (rank === 2) return 60;
+                    if (rank === 3) return 20;
+                    return 0;
+                },
+
+                playResultAnimation() {
+                    let count = 0;
+                    const total = this.currentHaikus.length || 0;
+                    this.visibleResultCount = 0;
+                    const interval = setInterval(() => {
+                        count++;
+                        this.visibleResultCount = count;
+                        if (count >= total) {
+                            clearInterval(interval);
+                            this.isResultAnimationDone = true;
+                        }
+                    }, 1500);
+                },
+
+                // --- ゲーム進行・設定 ---
+                async saveSettings() {
+                    if (!this.isMeMaster) return;
+                    // tempSettings -> settings -> DB
+                    const newSettings = {
+                        timeLimit: this.tempSettings.timeLimitMin * 60,
+                        showMaster: this.tempSettings.showMaster,
+                        showScore: this.tempSettings.showScore,
+                        likePoints: this.tempSettings.likePoints,
+                        everyonePlays: this.tempSettings.everyonePlays
+                    };
+                    await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
+                },
+
+                async startGame() {
+                    // Start Gameボタン
+                    try {
+                        // 開始時に設定を保存して確実にする
+                        await this.saveSettings();
+
+                        console.log('Starting game for room:', this.roomId);
+
+                        // 親をランダムに選出
+                        const randomIdx = Math.floor(Math.random() * this.players.length);
+                        const nextMasterUid = this.players[randomIdx].uid;
+
+                        await updateDoc(doc(db, "rooms", this.roomId), {
+                            status: 'WRITING',
+                            roundStartTime: Date.now(),
+                            masterUid: nextMasterUid,
+                            masterHistory: [nextMasterUid]
+                        });
+                        console.log('Game status updated to WRITING');
+                    } catch (e) {
+                        console.error('Error starting game:', e);
+                        alert('ゲーム開始エラー: ' + e.message);
+                    }
+                },
+
+                startTimer() {
+                    if (this.timerInterval) clearInterval(this.timerInterval);
+                    this.updateTime();
+                    this.timerInterval = setInterval(() => {
+                        this.updateTime();
+                    }, 1000);
+                },
+                stopTimer() {
+                    if (this.timerInterval) clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                    this.timeLeft = 0;
+                },
+                updateTime() {
+                    if (!this.roundStartTime || this.gamePhase !== 'WRITING') {
+                        this.timeLeft = 0;
+                        return;
+                    }
+                    const elapsed = (Date.now() - this.roundStartTime) / 1000;
+                    const limit = this.settings.timeLimit;
+                    const remain = limit - elapsed;
+
+                    if (remain <= 0) {
+                        this.timeLeft = 0;
+                        // 親であれば強制実行
+                        if (this.isMeMaster && this.gamePhase === 'WRITING') {
+                            // 連打防止のため、すでに処理中ならスキップしたいが...
+                            // forceAllSubmit内でbatch処理するのである程度安全。
+                            // ただし短時間に何度も呼ばれると困る
+                            this.forceAllSubmit();
+                        }
+                    } else {
+                        this.timeLeft = Math.floor(remain);
+                    }
+                },
+
+                async nextRound() {
+                    if (this.roundCount >= this.players.length) {
+                        // ゲーム終了時、優勝者のカウントを加算
+                        const sorted = [...this.players].sort((a, b) => b.score - a.score);
+                        const topScore = sorted.length > 0 ? sorted[0].score : -999;
+
+                        // 全員のwinCountを更新
+                        const updatedPlayers = this.players.map(p => {
+                            if (p.score === topScore && topScore > 0) { // 0点の場合は優勝とみなさない等は好みだが、ここでは単純に最高得点
+                                return { ...p, winCount: (p.winCount || 0) + 1 };
+                            }
+                            return p;
+                        });
+
+                        await updateDoc(doc(db, "rooms", this.roomId), {
+                            status: 'FINISHED',
+                            players: updatedPlayers
+                        });
+                    } else {
+                        const nextMasterIdx = this.roundCount % this.players.length;
+                        const nextMasterUid = this.players[nextMasterIdx].uid;
+
+                        const refreshedPlayers = this.players.map(p => {
+                            return { ...p, hand: generateHand() };
+                        });
+
+                        const newHistory = [...this.masterHistory];
+                        if (!newHistory.includes(nextMasterUid)) newHistory.push(nextMasterUid);
+
+                        await updateDoc(doc(db, "rooms", this.roomId), {
+                            roundCount: increment(1),
+                            masterUid: nextMasterUid,
+                            masterHistory: newHistory,
+                            status: 'WRITING',
+                            players: refreshedPlayers,
+                            roundStartTime: Date.now()
+                        });
+                    }
+                },
+
+                async startNextGame() {
+                    // 次のゲームの設定のためロビーに戻る
+                    const resetPlayers = this.players.map(p => ({
+                        ...p,
+                        score: 0,
+                        totalLikes: 0,
+                        // winCountは維持される(pに含まれるため)
+                        hand: generateHand()
+                    }));
+                    const firstMaster = resetPlayers[0].uid;
+
+                    await updateDoc(doc(db, "rooms", this.roomId), {
+                        players: resetPlayers,
+                        gameCount: increment(1),
+                        roundCount: 1,
+                        masterUid: firstMaster,
+                        masterHistory: [firstMaster],
+                        status: 'WAITING', // ロビーへ
+                        roundStartTime: null
+                    });
+                },
+
+                async leaveRoom() {
+                    // Firestoreからプレイヤー削除処理
+                    if (this.roomId && this.myUid) {
+                        try {
+                            const roomRef = doc(db, "rooms", this.roomId);
+                            const roomSnap = await getDoc(roomRef);
+                            if (roomSnap.exists()) {
+                                const data = roomSnap.data();
+                                // 自分のUIDを除外したプレイヤーリストを作成
+                                const newPlayers = data.players.filter(p => p.uid !== this.myUid);
+                                await updateDoc(roomRef, { players: newPlayers });
+                            }
+                        } catch (e) {
+                            console.error('Leave room error:', e);
+                        }
+                    }
+
+                    if (this.unsubRoom) this.unsubRoom();
+                    if (this.unsubHaikus) this.unsubHaikus();
+                    this.clearSession();
+                    this.viewState = 'LOBBY';
+                    this.roomId = '';
+                    this.currentHaikus = [];
+                },
+
+                // ルーム情報を完全にリセット（削除）
+                async resetRoom() {
+                    if (!this.roomId) {
+                        this.errorMessage = 'ルーム番号を入力してください';
+                        return;
+                    }
+
+                    const confirmed = confirm(`ルーム ${this.roomId} の情報を完全に削除します。よろしいですか？`);
+                    if (!confirmed) return;
+
+                    this.isLoading = true;
+                    this.errorMessage = '';
+
+                    try {
+                        // リスナーを解除
+                        if (this.unsubRoom) this.unsubRoom();
+                        if (this.unsubHaikus) this.unsubHaikus();
+
+                        const roomRef = doc(db, "rooms", this.roomId);
+
+                        // サブコレクション（俳句）を削除
+                        const haikusRef = collection(db, "rooms", this.roomId, "haikus");
+                        const haikusSnapshot = await getDocs(haikusRef);
+                        const batch = writeBatch(db);
+
+                        haikusSnapshot.forEach((docSnap) => {
+                            batch.delete(docSnap.ref);
+                        });
+
+                        // ルームドキュメントを削除
+                        batch.delete(roomRef);
+
+                        await batch.commit();
+
+                        // ローカル状態をリセット
+                        this.clearSession();
+                        this.viewState = 'LOBBY';
+                        this.currentHaikus = [];
+                        this.players = [];
+                        this.masterHistory = [];
+                        this.roundCount = 1;
+                        this.gameCount = 1;
+                        this.viewState = 'LOBBY';
+                        this.currentHaikus = [];
+                        this.players = [];
+                        this.masterHistory = [];
+                        this.roundCount = 1;
+                        this.gameCount = 1;
+                        this.gamePhase = 'WRITING';
+                        this.stopTimer();
+
+                        alert(`ルーム ${this.roomId} を削除しました。`);
+                        this.roomId = '';
+                    } catch (e) {
+                        console.error('Room reset error:', e);
+                        this.errorMessage = 'リセットに失敗しました: ' + e.message;
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                getMasterName() {
+                    const p = this.players.find(p => p.uid === this.masterUid);
+                    return p ? p.name : '不明';
+                },
+                getPlayerName(uid) {
+                    const p = this.players.find(p => p.uid === uid);
+                    return p ? p.name : '不明';
+                },
+                hasBeenMaster(uid) {
+                    return this.masterHistory.includes(uid);
+                },
+
+                // --- デバッグ用機能 ---
+                // --- デバッグ用機能 ---
+                switchPlayer(uid) {
+                    this.myUid = uid;
+                    const p = this.players.find(x => x.uid === uid);
+                    if (p) this.myPlayerName = p.name;
+                },
+                async add3NPCs() {
+                    if (!this.roomId) return;
+                    const npcNames = ['NPC一茶', 'NPC蕪村', 'NPC子規'];
+                    const newPlayers = [];
+                    for (let i = 0; i < 3; i++) {
+                        const npcId = 'npc-' + Math.random().toString(36).substr(2, 5);
+                        newPlayers.push({
+                            uid: npcId,
+                            name: npcNames[i],
+                            score: 0,
+                            totalLikes: 0,
+                            winCount: 0,
+                            hand: generateHand()
+                        });
+                    }
+                    await updateDoc(doc(db, "rooms", this.roomId), { players: arrayUnion(...newPlayers) });
+                },
+
+                async npcMasterJudge() {
+                    const roomRef = doc(db, "rooms", this.roomId);
+                    const candidates = [...this.currentHaikus].sort(() => 0.5 - Math.random());
+
+                    const tempRanks = {};
+                    candidates.forEach((h, i) => {
+                        if (i === 0) tempRanks[h.id] = 1;
+                        else if (i === 1) tempRanks[h.id] = 2;
+                        else if (i === 2) tempRanks[h.id] = 3;
+                    });
+
+                    const batch = writeBatch(db);
+                    const scoreUpdates = {};
+                    const likeUpdates = {};
+                    this.players.forEach(p => { scoreUpdates[p.uid] = 0; likeUpdates[p.uid] = 0; });
+
+                    for (const h of this.currentHaikus) {
+                        const rank = tempRanks[h.id] || 0;
+                        let rankScore = 0;
+                        if (rank === 1) rankScore = 100;
+                        else if (rank === 2) rankScore = 60;
+                        else if (rank === 3) rankScore = 20;
+
+                        const likeCount = h.likes ? h.likes.length : 0;
+                        const likeScore = likeCount * (this.settings.likePoints || 10);
+                        const bonusScore = rankScore + likeScore;
+                        const totalScore = (h.cardScore || 0) + bonusScore;
+
+                        const hRef = doc(db, "rooms", this.roomId, "haikus", h.id);
+                        batch.update(hRef, { rank, bonusScore, totalScore });
+
+                        if (scoreUpdates[h.userId] !== undefined) {
+                            scoreUpdates[h.userId] += totalScore;
+                            likeUpdates[h.userId] += likeCount;
+                        }
+                    }
+
+                    const newPlayers = this.players.map(p => {
+                        return {
+                            ...p,
+                            score: p.score + (scoreUpdates[p.uid] || 0),
+                            totalLikes: (p.totalLikes || 0) + (likeUpdates[p.uid] || 0)
+                        };
+                    });
+
+                    batch.update(roomRef, { players: newPlayers, status: 'RESULT' });
+                    await batch.commit();
+                },
+
+                async old_addNPC() {
+                    if (!this.roomId) return;
+                    const npcId = 'npc-' + Math.random().toString(36).substr(2, 5);
+                    const npcNames = ['一茶', '蕪村', '子規', '虚子', '晶子', '啄木', '万葉'];
+                    const name = 'NPC ' + npcNames[Math.floor(Math.random() * npcNames.length)];
+
+                    const newPlayer = {
+                        uid: npcId,
+                        name: name,
+                        score: 0,
+                        totalLikes: 0,
+                        winCount: 0,
+                        hand: generateHand()
+                    };
+
+                    await updateDoc(doc(db, "rooms", this.roomId), {
+                        players: arrayUnion(newPlayer)
+                    });
+                },
+
+                async npcSubmitAll() {
+                    const batch = writeBatch(db);
+                    const haikusRef = collection(db, "rooms", this.roomId, "haikus");
+
+                    // 未提出のNPCを探す
+                    const unsubmittedNPCs = this.players.filter(p => {
+                        return p.uid.startsWith('npc-') &&
+                            p.uid !== this.masterUid &&
+                            !this.currentHaikus.find(h => h.userId === p.uid);
+                    });
+
+                    if (unsubmittedNPCs.length === 0) {
+                        alert('提出可能なNPCはいません');
+                        return;
+                    }
+
+                    unsubmittedNPCs.forEach(p => {
+                        // 手札からランダムに選ぶ
+                        const top = p.hand.fives[Math.floor(Math.random() * p.hand.fives.length)];
+                        const middle = p.hand.sevens[Math.floor(Math.random() * p.hand.sevens.length)];
+                        // bottomはtopと被らないように
+                        let bottomCands = p.hand.fives.filter(c => c.id !== top.id);
+                        if (bottomCands.length === 0) bottomCands = [top];
+                        const bottom = bottomCands[Math.floor(Math.random() * bottomCands.length)];
+
+                        const cardScore = top.score + middle.score + bottom.score;
+
+                        const newDocRef = doc(haikusRef);
+                        batch.set(newDocRef, {
+                            userId: p.uid,
+                            top, middle, bottom,
+                            gameCount: this.gameCount,
+                            round: this.roundCount,
+                            rank: 0, likes: [], cardScore, bonusScore: 0, totalScore: 0,
+                            randomSortKey: Math.random()
+                        });
+                    });
+
+                    await batch.commit();
+                },
+
+                async npcLikeAll() {
+                    // いいねしていないNPCを探す
+                    // 親ではないNPC
+                    const voterNPCs = this.players.filter(p => {
+                        return p.uid.startsWith('npc-') && p.uid !== this.masterUid;
+                    });
+
+                    // 自分がいいね済みの判定が難しいので（likes配列を見る必要がある）、
+                    // ここではシンプルに「まだ誰にもいいねしていないNPC」にランダムな句へいいねさせる
+                    // ※厳密には「自分の句にはいいねできない」ルールも適用すべき
+
+                    const updates = [];
+
+                    for (const npc of voterNPCs) {
+                        // npcが既にいいねしているかチェック
+                        const alreadyVoted = this.currentHaikus.some(h => h.likes && h.likes.includes(npc.uid));
+                        if (alreadyVoted) continue;
+
+                        // いいね対象候補（自分の句以外）
+                        const candidates = this.currentHaikus.filter(h => h.userId !== npc.uid);
+                        if (candidates.length === 0) continue;
+
+                        const target = candidates[Math.floor(Math.random() * candidates.length)];
+
+                        // 更新用Mapに追加
+                        // 同じ句に複数のNPCが入れる可能性があるので、transactionか、あるいは一つずつ処理する
+                        // ここでは簡単のため一つずつupdateDocする
+                        const haikuRef = doc(db, "rooms", this.roomId, "haikus", target.id);
+                        await updateDoc(haikuRef, { likes: arrayUnion(npc.uid) });
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
