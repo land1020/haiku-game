@@ -368,14 +368,15 @@
             font-size: 3rem;
             font-weight: bold;
             text-shadow: 0 0 10px gold, 0 0 20px orangered;
-            writing-mode: vertical-rl;
-            text-orientation: upright;
-            height: 60vh;
+            /* writing-mode: vertical-rl; */
+            /* text-orientation: upright; */
+            height: auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 2rem;
+            gap: 1.5rem;
             margin: 0 auto;
+            padding: 50px 0;
         }
 
         .phrase {
@@ -1017,119 +1018,117 @@
             </div>
 
 
-
-        </div>
-        <div style="margin-top:15px;" v-if="isMeMaster">
-            <button class="btn" style="background:var(--oni-color);" @click="addToHallOfFame">
-                💾 殿堂入りに登録
-            </button>
-        </div>
-        <div style="margin-top:15px;">
-            <button class="btn" style="background:#888; font-size:0.85rem;" @click="resetRoom">
-                🗑️ ルーム情報を完全にリセット
-            </button>
-        </div>
-    </div>
-
-    <!-- 4. 殿堂入り閲覧画面 -->
-    <div v-else-if="viewState === 'HALL_OF_FAME'" class="card-box" style="text-align:center;">
-        <div style="background:var(--oni-color); color:#fff; padding:10px; margin-bottom:15px; border-radius:4px;">
-            <h2>🏆 殿堂入り 🏆</h2>
+            <div style="margin-top:15px;" v-if="isMeMaster">
+                <button class="btn" style="background:var(--oni-color);" @click="addToHallOfFame">
+                    💾 殿堂入りに登録
+                </button>
+            </div>
+            <div style="margin-top:15px;">
+                <button class="btn" style="background:#888; font-size:0.85rem;" @click="resetRoom">
+                    🗑️ ルーム情報を完全にリセット
+                </button>
+            </div>
         </div>
 
-        <div style="margin-bottom:20px; display:flex; justify-content:center; gap:10px;">
-            <button class="btn" @click="closeHallOfFame">戻る</button>
-            <button class="btn" style="background:#888; font-size:0.8rem;" @click="resetHallOfFame"
-                v-if="hallOfFameList.length > 0">
-                🗑️ 全て削除
-            </button>
-        </div>
-
-        <div v-if="hallOfFameList.length === 0">
-            <p>まだ殿堂入りの記録はありません。</p>
-        </div>
-
-        <div v-for="record in hallOfFameList" :key="record.id" class="card-box"
-            style="margin-bottom:20px; border:1px solid #ddd; text-align:left;">
-
-            <div
-                style="background:#f0f0f0; padding:5px 10px; border-bottom:1px solid #ccc; font-size:0.9rem; display:flex; justify-content:space-between;">
-                <strong>{{ formatDate(record.createdAt) }}</strong>
-                <span>ルーム: {{ record.roomId }}</span>
+        <!-- 4. 殿堂入り閲覧画面 -->
+        <div v-else-if="viewState === 'HALL_OF_FAME'" class="card-box" style="text-align:center;">
+            <div style="background:var(--oni-color); color:#fff; padding:10px; margin-bottom:15px; border-radius:4px;">
+                <h2>🏆 殿堂入り 🏆</h2>
             </div>
 
-            <div style="padding:10px;">
-                <!-- 優勝者 -->
-                <div style="margin-bottom:10px;">
-                    <strong>👑 優勝:</strong>
-                    <span v-if="record.players && record.players.length > 0">
-                        {{ record.players[0].name }} ({{ record.players[0].score }}pt)
-                    </span>
-                    <span v-else>不明</span>
+            <div style="margin-bottom:20px; display:flex; justify-content:center; gap:10px;">
+                <button class="btn" @click="closeHallOfFame">戻る</button>
+                <button class="btn" style="background:#888; font-size:0.8rem;" @click="resetHallOfFame"
+                    v-if="hallOfFameList.length > 0">
+                    🗑️ 全て削除
+                </button>
+            </div>
+
+            <div v-if="hallOfFameList.length === 0">
+                <p>まだ殿堂入りの記録はありません。</p>
+            </div>
+
+            <div v-for="record in hallOfFameList" :key="record.id" class="card-box"
+                style="margin-bottom:20px; border:1px solid #ddd; text-align:left;">
+
+                <div
+                    style="background:#f0f0f0; padding:5px 10px; border-bottom:1px solid #ccc; font-size:0.9rem; display:flex; justify-content:space-between;">
+                    <strong>{{ formatDate(record.createdAt) }}</strong>
+                    <span>ルーム: {{ record.roomId }}</span>
                 </div>
 
-                <!-- MVP俳句 -->
-                <div v-if="record.mvpHaikus && record.mvpHaikus.length > 0">
-                    <div style="font-size:0.9rem; font-weight:bold; color:#e91e63; margin-bottom:5px;">
-                        [MVP俳句]
-                    </div>
-                    <div v-for="(h, i) in record.mvpHaikus" :key="i" class="tanzaku"
-                        style="margin-bottom:5px; padding:5px; border:1px solid gold; font-size:1rem;">
-                        {{ i+1 }}位: {{ h.top.text }} {{ h.middle.text }} {{ h.bottom.text }}
-                        <span style="font-size:0.8rem; color:#666;">
-                            (詠: {{ getPlayerName(h.userId) }})
+                <div style="padding:10px;">
+                    <!-- 優勝者 -->
+                    <div style="margin-bottom:10px;">
+                        <strong>👑 優勝:</strong>
+                        <span v-if="record.players && record.players.length > 0">
+                            {{ record.players[0].name }} ({{ record.players[0].score }}pt)
                         </span>
+                        <span v-else>不明</span>
+                    </div>
+
+                    <!-- MVP俳句 -->
+                    <div v-if="record.mvpHaikus && record.mvpHaikus.length > 0">
+                        <div style="font-size:0.9rem; font-weight:bold; color:#e91e63; margin-bottom:5px;">
+                            [MVP俳句]
+                        </div>
+                        <div v-for="(h, i) in record.mvpHaikus" :key="i" class="tanzaku"
+                            style="margin-bottom:5px; padding:5px; border:1px solid gold; font-size:1rem;">
+                            {{ i+1 }}位: {{ h.top.text }} {{ h.middle.text }} {{ h.bottom.text }}
+                            <span style="font-size:0.8rem; color:#666;">
+                                (詠: {{ getPlayerName(h.userId) }})
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 5. 俳句演出オーバーレイ -->
-    <transition name="fade">
-        <div v-if="showSpecialEffectOverlay && specialEffectHaiku" class="special-overlay">
-            <div class="special-content">
-                <div class="special-bg"></div>
-                <div class="special-text">
-                    <div class="phrase top">{{ specialEffectHaiku.top.text }}</div>
-                    <div class="phrase middle">{{ specialEffectHaiku.middle.text }}</div>
-                    <div class="phrase bottom">{{ specialEffectHaiku.bottom.text }}</div>
-                </div>
-                <div class="special-footer">
-                    渾身の一句！！
+        <!-- 5. 俳句演出オーバーレイ -->
+        <transition name="fade">
+            <div v-if="showSpecialEffectOverlay && specialEffectHaiku" class="special-overlay">
+                <div class="special-content">
+                    <div class="special-bg"></div>
+                    <div class="special-text">
+                        <div class="phrase top">{{ specialEffectHaiku.top.text }}</div>
+                        <div class="phrase middle">{{ specialEffectHaiku.middle.text }}</div>
+                        <div class="phrase bottom">{{ specialEffectHaiku.bottom.text }}</div>
+                    </div>
+                    <div class="special-footer">
+                        渾身の一句！！
+                    </div>
                 </div>
             </div>
-        </div>
-    </transition>
+        </transition>
 
-    <!-- デバッグメニュー -->
-    <!-- デバッグメニュー -->
-    <div class="debug-panel" v-if="viewState !== 'LOBBY' && isTestMode">
-        <div style="font-weight:bold; margin-bottom:5px;">🛠️ テスト/デバッグ</div>
+        <!-- デバッグメニュー -->
+        <!-- デバッグメニュー -->
+        <div class="debug-panel" v-if="viewState !== 'LOBBY' && isTestMode">
+            <div style="font-weight:bold; margin-bottom:5px;">🛠️ テスト/デバッグ</div>
 
-        <!-- プレイヤー切り替えタブ -->
-        <div class="debug-tabs">
-            <div v-for="p in players" :key="p.uid" class="debug-tab" :class="{ active: p.uid === myUid }"
-                @click="switchPlayer(p.uid)">
-                {{ p.name }}
+            <!-- プレイヤー切り替えタブ -->
+            <div class="debug-tabs">
+                <div v-for="p in players" :key="p.uid" class="debug-tab" :class="{ active: p.uid === myUid }"
+                    @click="switchPlayer(p.uid)">
+                    {{ p.name }}
+                </div>
+            </div>
+
+            <div v-if="viewState === 'WAITING'">
+                <button class="debug-btn" @click="add3NPCs">🤖 NPCを3人追加</button>
+            </div>
+
+            <div style="margin-top:5px; border-top:1px solid #555; padding-top:5px;">
+                <div style="font-size:0.7rem;">現在の視点: <span style="font-weight:bold; color:#e91e63;">{{
+                        getPlayerName(myUid)
+                        }}</span></div>
+                <button class="debug-btn" @click="npcSubmitAll" v-if="gamePhase === 'WRITING'">📝 他全員提出(強制)</button>
+                <button class="debug-btn" @click="npcLikeAll" v-if="gamePhase === 'JUDGING'">❤️ 他全員いいね(強制)</button>
+                <button class="debug-btn" @click="npcMasterJudge"
+                    v-if="gamePhase === 'JUDGING' && masterUid && masterUid.startsWith('npc-')">👑
+                    NPC親投票＆完了(強制)</button>
             </div>
         </div>
-
-        <div v-if="viewState === 'WAITING'">
-            <button class="debug-btn" @click="add3NPCs">🤖 NPCを3人追加</button>
-        </div>
-
-        <div style="margin-top:5px; border-top:1px solid #555; padding-top:5px;">
-            <div style="font-size:0.7rem;">現在の視点: <span style="font-weight:bold; color:#e91e63;">{{
-                    getPlayerName(myUid)
-                    }}</span></div>
-            <button class="debug-btn" @click="npcSubmitAll" v-if="gamePhase === 'WRITING'">📝 他全員提出(強制)</button>
-            <button class="debug-btn" @click="npcLikeAll" v-if="gamePhase === 'JUDGING'">❤️ 他全員いいね(強制)</button>
-            <button class="debug-btn" @click="npcMasterJudge"
-                v-if="gamePhase === 'JUDGING' && masterUid && masterUid.startsWith('npc-')">👑
-                NPC親投票＆完了(強制)</button>
-        </div>
-    </div>
     </div>
 
     <!-- Vue & Firebase Logic -->
