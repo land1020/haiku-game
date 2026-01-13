@@ -428,6 +428,12 @@
                     🗑️ ルーム情報をリセット
                 </button>
             </div>
+
+            <div style="margin-top:15px;">
+                <button class="btn" style="background:var(--oni-color); font-size:1rem;" @click="openHallOfFame">
+                    🏆 殿堂入りを見る
+                </button>
+            </div>
         </div>
 
         <!-- 2. ロビー（待機・設定）画面 -->
@@ -851,6 +857,28 @@
                 </span>
                 <strong v-if="settings.showScore">{{ p.score }} pt</strong>
             </div>
+
+            <!-- MVP俳句表示エリア -->
+            <div v-if="topLikedHaikus.length > 0" style="margin-top:30px; text-align:center;">
+                <h3 style="color:#e91e63; border-bottom:2px dashed #e91e63; display:inline-block; padding-bottom:5px;">
+                    🏆 今日のMVP俳句 🏆
+                </h3>
+                <div v-for="(h, idx) in topLikedHaikus" :key="h.id" class="tanzaku"
+                    style="margin-bottom:15px; border:2px solid gold; box-shadow:0 0 10px rgba(255, 215, 0, 0.4);">
+
+                    <div style="font-size:0.9rem; font-weight:bold; color:#e91e63; margin-bottom:5px;">
+                        {{ idx + 1 }}位 (❤️ {{ h.likes ? h.likes.length : 0 }})
+                    </div>
+
+                    <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
+                        {{ h.top.text }}　{{ h.middle.text }}　{{ h.bottom.text }}
+                    </div>
+
+                    <div style="text-align:right; font-weight:bold; color:var(--sub-color); font-size:0.9rem;">
+                        詠：{{ getPlayerName(h.userId) }}
+                    </div>
+                </div>
+            </div>
             <br>
             <br>
             <div v-if="isMeMaster">
@@ -862,10 +890,65 @@
             <div style="margin-top:15px;">
                 <button class="btn btn-danger" @click="leaveRoom">部屋を抜ける</button>
             </div>
+            <div style="margin-top:15px;" v-if="isMeMaster">
+                <button class="btn" style="background:var(--oni-color);" @click="addToHallOfFame">
+                    💾 殿堂入りに登録
+                </button>
+            </div>
             <div style="margin-top:15px;">
                 <button class="btn" style="background:#888; font-size:0.85rem;" @click="resetRoom">
                     🗑️ ルーム情報を完全にリセット
                 </button>
+            </div>
+        </div>
+
+        <!-- 4. 殿堂入り閲覧画面 -->
+        <div v-else-if="viewState === 'HALL_OF_FAME'" class="card-box" style="text-align:center;">
+            <div style="background:var(--oni-color); color:#fff; padding:10px; margin-bottom:15px; border-radius:4px;">
+                <h2>🏆 殿堂入り 🏆</h2>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <button class="btn" @click="closeHallOfFame">戻る</button>
+            </div>
+
+            <div v-if="hallOfFameList.length === 0">
+                <p>まだ殿堂入りの記録はありません。</p>
+            </div>
+
+            <div v-for="record in hallOfFameList" :key="record.id" class="card-box"
+                style="margin-bottom:20px; border:1px solid #ddd; text-align:left;">
+
+                <div
+                    style="background:#f0f0f0; padding:5px 10px; border-bottom:1px solid #ccc; font-size:0.9rem; display:flex; justify-content:space-between;">
+                    <strong>{{ formatDate(record.createdAt) }}</strong>
+                    <span>ルーム: {{ record.roomId }}</span>
+                </div>
+
+                <div style="padding:10px;">
+                    <!-- 優勝者 -->
+                    <div style="margin-bottom:10px;">
+                        <strong>👑 優勝:</strong>
+                        <span v-if="record.players && record.players.length > 0">
+                            {{ record.players[0].name }} ({{ record.players[0].score }}pt)
+                        </span>
+                        <span v-else>不明</span>
+                    </div>
+
+                    <!-- MVP俳句 -->
+                    <div v-if="record.mvpHaikus && record.mvpHaikus.length > 0">
+                        <div style="font-size:0.9rem; font-weight:bold; color:#e91e63; margin-bottom:5px;">
+                            [MVP俳句]
+                        </div>
+                        <div v-for="(h, i) in record.mvpHaikus" :key="i" class="tanzaku"
+                            style="margin-bottom:5px; padding:5px; border:1px solid gold; font-size:1rem;">
+                            {{ i+1 }}位: {{ h.top.text }} {{ h.middle.text }} {{ h.bottom.text }}
+                            <span style="font-size:0.8rem; color:#666;">
+                                (詠: {{ getPlayerName(h.userId) }})
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1208,6 +1291,7 @@
                     gameCount: 1,
 
                     currentHaikus: [],
+                    allGameHaikus: [], // ゲーム全体の俳句（MVP選出用）
                     myDraft: { top: null, middle: null, bottom: null },
 
                     freeInputText: '',
@@ -1313,6 +1397,21 @@
                 },
                 likeTargetCount() {
                     return this.settings.everyonePlays ? this.players.length : (this.players.length - 1);
+                },
+                // 全ラウンド通してのMVP俳句（いいね数順 -> 点数順）
+                topLikedHaikus() {
+                    if (!this.allGameHaikus || this.allGameHaikus.length === 0) return [];
+
+                    // 現在のゲーム(gameCount)の俳句のみ対象
+                    const target = this.allGameHaikus.filter(h => h.gameCount === this.gameCount);
+
+                    // ソート: いいね数(降順) > 点数(降順)
+                    return target.sort((a, b) => {
+                        const likeA = a.likes ? a.likes.length : 0;
+                        const likeB = b.likes ? b.likes.length : 0;
+                        if (likeA !== likeB) return likeB - likeA;
+                        return (b.totalScore || 0) - (a.totalScore || 0);
+                    }).slice(0, 3); // 上位3つ
                 }
             },
 
@@ -1406,7 +1505,10 @@
                     return false;
                 },
 
-                // --- ロビー機能 ---
+                // ロビー機能
+                hallOfFameList: [],
+
+                // ロビー機能 --- 
                 async enterRoom() {
                     if (!db) { this.errorMessage = "Firebase設定がありません"; return; }
                     this.isLoading = true;
@@ -1583,6 +1685,10 @@
                     const haikusRef = collection(db, "rooms", this.roomId, "haikus");
                     this.unsubHaikus = onSnapshot(haikusRef, (snapshot) => {
                         const allHaikus = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                        // 全俳句を保持（MVP用）
+                        this.allGameHaikus = allHaikus;
+
                         this.currentHaikus = allHaikus.filter(h =>
                             h.gameCount === this.gameCount &&
                             h.round === this.roundCount
@@ -1701,7 +1807,9 @@
                     if (!this.myDraft.top) return;
                     const cardScore = this.myDraft.top.score + this.myDraft.middle.score + this.myDraft.bottom.score;
 
-                    await addDoc(collection(db, "rooms", this.roomId, "haikus"), {
+                    // 重複提出防止のため、ユーザーIDとラウンド情報をキーにしたIDを生成
+                    const haikuId = `${this.gameCount}_${this.roundCount}_${this.myUid}`;
+                    await setDoc(doc(db, "rooms", this.roomId, "haikus", haikuId), {
                         userId: this.myUid,
                         top: this.myDraft.top,
                         middle: this.myDraft.middle,
@@ -1739,7 +1847,8 @@
 
                         const cardScore = top.score + middle.score + bottom.score;
 
-                        const newDocRef = doc(haikusRef);
+                        const haikuId = `${this.gameCount}_${this.roundCount}_${p.uid}`;
+                        const newDocRef = doc(haikusRef, haikuId);
                         batch.set(newDocRef, {
                             userId: p.uid,
                             top, middle, bottom,
@@ -1982,7 +2091,17 @@
                             players: updatedPlayers
                         });
                     } else {
-                        const nextMasterIdx = this.roundCount % this.players.length;
+                        // 次の親を決定（順番に回す）
+                        // ※単純に roundCount % length だと、ゲーム2回目以降におかしくなる可能性があるため、
+                        // 「ゲーム開始時の親」を基準にシフトさせるか、単にインデックスを回す。
+                        // 今回はシンプルに (現在の親インデックス + 1) % 人数 で計算する。
+
+                        const currentMasterIdx = this.players.findIndex(p => p.uid === this.masterUid);
+                        let nextMasterIdx = 0;
+                        if (currentMasterIdx !== -1) {
+                            nextMasterIdx = (currentMasterIdx + 1) % this.players.length;
+                        }
+
                         const nextMasterUid = this.players[nextMasterIdx].uid;
 
                         const refreshedPlayers = this.players.map(p => {
@@ -2258,6 +2377,64 @@
                     await batch.commit();
                 },
 
+                async addToHallOfFame() {
+                    if (!this.topLikedHaikus || this.topLikedHaikus.length === 0) {
+                        alert("MVP俳句がないため登録できません");
+                        return;
+                    }
+                    if (!confirm("現在の結果を殿堂入りに登録しますか？")) return;
+
+                    try {
+                        await addDoc(collection(db, "hallOfFame"), {
+                            createdAt: Date.now(),
+                            roomId: this.roomId,
+                            players: this.sortedPlayers, // 最終順位
+                            mvpHaikus: this.topLikedHaikus,
+                            gameCount: this.gameCount
+                        });
+                        alert("殿堂入りに登録しました！");
+                    } catch (e) {
+                        console.error("Hall of fame error:", e);
+                        alert("登録に失敗しました: " + e.message);
+                    }
+                },
+
+                async openHallOfFame() {
+                    this.isLoading = true;
+                    try {
+                        const q = window.query || ((ref, opts) => ref); // query関数がimportされていない場合の対策が必要だが、今回はCDNから全部取ってるはず。
+                        // firebase-firestore.jsのimportにquery, orderBy, limitを追加する必要があるかも。
+                        // 先ほどのimport文を確認すると、query, orderBy, limit が足りない可能性がある。
+                        // ここでは、一旦全件取得してJSでソートする（件数が少なければ問題ない）
+
+                        const snap = await getDocs(collection(db, "hallOfFame"));
+                        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                        // 日付降順
+                        list.sort((a, b) => b.createdAt - a.createdAt);
+
+                        this.hallOfFameList = list;
+                        this.viewState = 'HALL_OF_FAME';
+                    } catch (e) {
+                        console.error(e);
+                        alert("読み込み失敗: " + e.message);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                closeHallOfFame() {
+                    this.viewState = 'LOBBY';
+                    this.hallOfFameList = [];
+                },
+
+                formatDate(ts) {
+                    if (!ts) return '-';
+                    const d = new Date(ts);
+                    return d.toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                },
+
+                // npcLikeAllなどの既存メソッドの後に続く
                 async npcLikeAll() {
                     // いいねしていないNPCを探す
                     // 親ではないNPC
