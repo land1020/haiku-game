@@ -1504,7 +1504,7 @@
                         showScore: true,
                         likePoints: 10,
                         everyonePlays: false,
-                        handSizeFive: 10,
+                        handSizeFive: 5,
                         handSizeSeven: 5
                     },
                     tempSettings: { // 編集用
@@ -1513,7 +1513,7 @@
                         showScore: true,
                         likePoints: 10,
                         everyonePlays: false,
-                        handSizeFive: 10,
+                        handSizeFive: 5,
                         handSizeSeven: 5
                     },
                     roundStartTime: null,
@@ -1750,7 +1750,7 @@
                                     showScore: true,
                                     likePoints: 10,
                                     everyonePlays: false,
-                                    handSizeFive: 10, // 5文字カード枚数
+                                    handSizeFive: 5, // 5文字カード枚数
                                     handSizeSeven: 5  // 7文字カード枚数
                                 },
                                 roundStartTime: null
@@ -2295,11 +2295,23 @@
                         const randomIdx = Math.floor(Math.random() * this.players.length);
                         const nextMasterUid = this.players[randomIdx].uid;
 
+                        // 設定に合わせて手札を配り直す
+                        const refreshedPlayers = this.players.map(p => {
+                            return {
+                                ...p,
+                                hand: generateHand(
+                                    this.tempSettings.handSizeFive,
+                                    this.tempSettings.handSizeSeven
+                                )
+                            };
+                        });
+
                         await updateDoc(doc(db, "rooms", this.roomId), {
                             status: 'WRITING',
                             roundStartTime: Date.now(),
                             masterUid: nextMasterUid,
-                            masterHistory: [nextMasterUid]
+                            masterHistory: [nextMasterUid],
+                            players: refreshedPlayers
                         });
                         console.log('Game status updated to WRITING');
                     } catch (e) {
