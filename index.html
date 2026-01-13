@@ -1016,22 +1016,7 @@
                 <button class="btn btn-danger" @click="leaveRoom">部屋を抜ける</button>
             </div>
 
-            <!-- 5. 俳句演出オーバーレイ -->
-            <transition name="fade">
-                <div v-if="showSpecialEffectOverlay && specialEffectHaiku" class="special-overlay">
-                    <div class="special-content">
-                        <div class="special-bg"></div>
-                        <div class="special-text">
-                            <div class="phrase top">{{ specialEffectHaiku.top.text }}</div>
-                            <div class="phrase middle">{{ specialEffectHaiku.middle.text }}</div>
-                            <div class="phrase bottom">{{ specialEffectHaiku.bottom.text }}</div>
-                        </div>
-                        <div class="special-footer">
-                            渾身の一句！！
-                        </div>
-                    </div>
-                </div>
-            </transition>
+
 
         </div>
         <div style="margin-top:15px;" v-if="isMeMaster">
@@ -1100,7 +1085,22 @@
         </div>
     </div>
 
-
+    <!-- 5. 俳句演出オーバーレイ -->
+    <transition name="fade">
+        <div v-if="showSpecialEffectOverlay && specialEffectHaiku" class="special-overlay">
+            <div class="special-content">
+                <div class="special-bg"></div>
+                <div class="special-text">
+                    <div class="phrase top">{{ specialEffectHaiku.top.text }}</div>
+                    <div class="phrase middle">{{ specialEffectHaiku.middle.text }}</div>
+                    <div class="phrase bottom">{{ specialEffectHaiku.bottom.text }}</div>
+                </div>
+                <div class="special-footer">
+                    渾身の一句！！
+                </div>
+            </div>
+        </div>
+    </transition>
 
     <!-- デバッグメニュー -->
     <!-- デバッグメニュー -->
