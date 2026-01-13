@@ -908,8 +908,12 @@
                 <h2>🏆 殿堂入り 🏆</h2>
             </div>
 
-            <div style="margin-bottom:20px;">
+            <div style="margin-bottom:20px; display:flex; justify-content:center; gap:10px;">
                 <button class="btn" @click="closeHallOfFame">戻る</button>
+                <button class="btn" style="background:#888; font-size:0.8rem;" @click="resetHallOfFame"
+                    v-if="hallOfFameList.length > 0">
+                    🗑️ 全て削除
+                </button>
             </div>
 
             <div v-if="hallOfFameList.length === 0">
@@ -2426,6 +2430,34 @@
                 closeHallOfFame() {
                     this.viewState = 'LOBBY';
                     this.hallOfFameList = [];
+                },
+
+                async resetHallOfFame() {
+                    const password = prompt("殿堂入りをリセットするためのパスワードを入力してください");
+                    if (password !== "1111") {
+                        alert("パスワードが違います");
+                        return;
+                    }
+
+                    if (!confirm("本当に全ての殿堂入りデータを削除しますか？\nこの操作は取り消せません。")) return;
+
+                    this.isLoading = true;
+                    try {
+                        const batch = writeBatch(db);
+                        this.hallOfFameList.forEach(record => {
+                            const ref = doc(db, "hallOfFame", record.id);
+                            batch.delete(ref);
+                        });
+                        await batch.commit();
+
+                        this.hallOfFameList = [];
+                        alert("殿堂入りデータをリセットしました");
+                    } catch (e) {
+                        console.error(e);
+                        alert("リセット失敗: " + e.message);
+                    } finally {
+                        this.isLoading = false;
+                    }
                 },
 
                 formatDate(ts) {
