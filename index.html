@@ -1028,10 +1028,6 @@
                     <span v-if="p.winCount && p.winCount > 0" class="win-badge">
                         <img src="./haiku_badge.png" class="win-icon" alt="🏆"> {{ p.winCount }}回優勝
                     </span>
-                    <!-- お気に入り俳句表示 -->
-                    <div v-if="p.favoriteHaikuId" style="font-size:0.75rem; color:var(--fav-color); margin-top:2px;">
-                        ★ {{ getHaikuText(p.favoriteHaikuId) }}
-                    </div>
                 </span>
                 <strong v-if="settings.showScore">{{ p.score }} pt</strong>
             </div>
