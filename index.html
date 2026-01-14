@@ -20,6 +20,7 @@
             --sub-color: #2a3a55;
             --gold-color: #c5a059;
             --free-color: #2e8b57;
+            --fav-color: #ff8c00;
         }
 
         body {
@@ -906,8 +907,9 @@
                             {{ r }}位
                         </button>
                     </div>
-                    <!-- いいねボタン（自分の俳句以外、かつまだいいねしていない場合のみ押せる） -->
-                    <div v-else-if="haiku.userId !== myUid" style="text-align:right; margin-top:5px;">
+                    <!-- いいね・お気に入りボタン -->
+                    <div v-else-if="haiku.userId !== myUid"
+                        style="text-align:right; margin-top:5px; display:flex; justify-content:flex-end; gap:5px; flex-wrap:wrap;">
                         <button @click="toggleLike(haiku)"
                             :disabled="hasLikedAny && !(haiku.likes && haiku.likes.includes(myUid))" :style="{
                                 background: (haiku.likes && haiku.likes.includes(myUid)) ? '#e91e63' : 'none',
@@ -918,7 +920,18 @@
                                 cursor: (hasLikedAny && !(haiku.likes && haiku.likes.includes(myUid))) ? 'not-allowed' : 'pointer',
                                 opacity: (hasLikedAny && !(haiku.likes && haiku.likes.includes(myUid))) ? '0.5' : '1'
                             }">
-                            {{ (haiku.likes && haiku.likes.includes(myUid)) ? '❤️ いいね済（取消可）' : '🤍 いいね' }}
+                            {{ (haiku.likes && haiku.likes.includes(myUid)) ? '❤️ いいね済' : '🤍 いいね' }}
+                        </button>
+                        <!-- お気に入りボタン (各自1個・上書き可) -->
+                        <button @click="toggleFavorite(haiku)" :style="{
+                            background: (getMyFavoriteHaikuId() === haiku.id) ? 'var(--fav-color)' : 'none',
+                            color: (getMyFavoriteHaikuId() === haiku.id) ? 'white' : '#333',
+                            border: '1px solid #ccc',
+                            borderRadius: '15px',
+                            padding: '5px 15px',
+                            cursor: 'pointer'
+                        }">
+                            {{ (getMyFavoriteHaikuId() === haiku.id) ? '★ お気に入り済' : '☆ お気に入り' }}
                         </button>
                     </div>
                 </div>
@@ -1007,6 +1020,10 @@
                     <span v-if="p.winCount && p.winCount > 0" class="win-badge">
                         <img src="./haiku_badge.png" class="win-icon" alt="🏆"> {{ p.winCount }}回優勝
                     </span>
+                    <!-- お気に入り俳句表示 -->
+                    <div v-if="p.favoriteHaikuId" style="font-size:0.75rem; color:var(--fav-color); margin-top:2px;">
+                        ★ {{ getHaikuText(p.favoriteHaikuId) }}
+                    </div>
                 </span>
                 <strong v-if="settings.showScore">{{ p.score }} pt</strong>
             </div>
@@ -1029,6 +1046,26 @@
 
                     <div style="text-align:right; font-weight:bold; color:var(--sub-color); font-size:0.9rem;">
                         詠：{{ getPlayerName(h.userId) }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- お気に入り俳句表示エリア -->
+            <div v-if="getFavoritedHaikusSummary().length > 0" style="margin-top:30px; text-align:center;">
+                <h3
+                    style="color:var(--fav-color); border-bottom:2px dashed var(--fav-color); display:inline-block; padding-bottom:5px;">
+                    ★ みんなのお気に入り俳句 ★
+                </h3>
+                <div v-for="(item, idx) in getFavoritedHaikusSummary()" :key="idx" class="tanzaku"
+                    style="margin-bottom:15px; border:2px solid var(--fav-color); background:#fffaf0;">
+                    <div style="font-size:0.9rem; font-weight:bold; color:var(--fav-color); margin-bottom:5px;">
+                        選者: {{ item.fanNames.join('、') }}
+                    </div>
+                    <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
+                        {{ item.haiku.top.text }}　{{ item.haiku.middle.text }}　{{ item.haiku.bottom.text }}
+                    </div>
+                    <div style="text-align:right; font-weight:bold; color:var(--sub-color); font-size:0.9rem;">
+                        詠：{{ getPlayerName(item.haiku.userId) }}
                     </div>
                 </div>
             </div>
@@ -1084,27 +1121,56 @@
                     <span>ルーム: {{ record.roomId }}</span>
                 </div>
 
-                <div style="padding:10px;">
-                    <!-- 優勝者 -->
-                    <div style="margin-bottom:10px;">
-                        <strong>👑 優勝:</strong>
-                        <span v-if="record.players && record.players.length > 0">
-                            {{ record.players[0].name }} ({{ record.players[0].score }}pt)
+                <!-- 概要（クリックで展開） -->
+                <div style="padding:10px; cursor:pointer;" @click="toggleHallOfFameDetail(record.id)">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>
+                            <strong>👑 優勝:</strong>
+                            <span v-if="record.players && record.players.length > 0">
+                                {{ record.players[0].name }} ({{ record.players[0].score }}pt)
+                            </span>
                         </span>
-                        <span v-else>不明</span>
+                        <span style="font-size:0.8rem; color:#666;">
+                            {{ expandedRecordId === record.id ? '▲ 閉じる' : '▼ 詳細を見る' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 詳細（展開時のみ表示） -->
+                <div v-if="expandedRecordId === record.id"
+                    style="padding:10px; border-top:1px dashed #ddd; background:#fafafa;">
+                    <!-- 参加者リスト -->
+                    <div style="margin-bottom:15px;">
+                        <div style="font-weight:bold; margin-bottom:5px;">👥 参加者と成績</div>
+                        <div v-for="p in record.players" :key="p.uid"
+                            style="font-size:0.9rem; border-bottom:1px dotted #ccc; padding:2px 0;">
+                            <span>{{ p.name }} ({{ p.score }}pt)</span>
+                            <span v-if="p.favoriteHaikuId"
+                                style="display:block; font-size:0.8rem; color:var(--fav-color); margin-left:10px;">
+                                ↳ ★ {{ getHaikuTextFromRecord(record, p.favoriteHaikuId) }}
+                            </span>
+                        </div>
                     </div>
 
                     <!-- MVP俳句 -->
-                    <div v-if="record.mvpHaikus && record.mvpHaikus.length > 0">
-                        <div style="font-size:0.9rem; font-weight:bold; color:#e91e63; margin-bottom:5px;">
-                            [MVP俳句]
-                        </div>
+                    <div v-if="record.mvpHaikus && record.mvpHaikus.length > 0" style="margin-bottom:15px;">
+                        <div style="font-weight:bold; color:#e91e63; margin-bottom:5px;">[MVP俳句]</div>
                         <div v-for="(h, i) in record.mvpHaikus" :key="i" class="tanzaku"
                             style="margin-bottom:5px; padding:5px; border:1px solid gold; font-size:1rem;">
                             {{ i+1 }}位: {{ h.top.text }} {{ h.middle.text }} {{ h.bottom.text }}
-                            <span style="font-size:0.8rem; color:#666;">
-                                (詠: {{ getPlayerName(h.userId) }})
-                            </span>
+                            <br><span style="font-size:0.8rem; color:#666;">(詠: {{ getPlayerNameFromRecord(record,
+                                h.userId) }})</span>
+                        </div>
+                    </div>
+
+                    <!-- お気に入り俳句 -->
+                    <div v-if="getFavoritedHaikusFromRecord(record).length > 0">
+                        <div style="font-weight:bold; color:var(--fav-color); margin-bottom:5px;">[お気に入り俳句]</div>
+                        <div v-for="(item, idx) in getFavoritedHaikusFromRecord(record)" :key="idx" class="tanzaku"
+                            style="margin-bottom:5px; padding:5px; border:1px solid var(--fav-color); font-size:1rem; background:#fffaf0;">
+                            ★ {{ item.haiku.top.text }} {{ item.haiku.middle.text }} {{ item.haiku.bottom.text }}
+                            <br><span style="font-size:0.8rem; color:#666;">(詠: {{ getPlayerNameFromRecord(record,
+                                item.haiku.userId) }}) / 選: {{ item.fanNames.join('、') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1488,6 +1554,8 @@
 
                     unsubRoom: null,
                     unsubHaikus: null,
+
+                    expandedRecordId: null, // 殿堂入り展開用
 
                     // 接続安定化用
                     isReconnecting: false,
@@ -2671,8 +2739,9 @@
                         await addDoc(collection(db, "hallOfFame"), {
                             createdAt: Date.now(),
                             roomId: this.roomId,
-                            players: this.sortedPlayers, // 最終順位
+                            players: this.sortedPlayers, // 最終順位（favoriteHaikuId含む）
                             mvpHaikus: this.topLikedHaikus,
+                            favoriteHaikusData: this.getFavoritedHaikuObjects(), // お気に入り俳句の実体
                             gameCount: this.gameCount
                         });
                         alert("殿堂入りに登録しました！");
@@ -2680,6 +2749,97 @@
                         console.error("Hall of fame error:", e);
                         alert("登録に失敗しました: " + e.message);
                     }
+                },
+
+                // --- お気に入り機能 ---
+                getMyFavoriteHaikuId() {
+                    const p = this.players.find(x => x.uid === this.myUid);
+                    return p ? p.favoriteHaikuId : null;
+                },
+
+                async toggleFavorite(haiku) {
+                    const myIdx = this.players.findIndex(p => p.uid === this.myUid);
+                    if (myIdx === -1) return;
+
+                    const updatedPlayers = [...this.players];
+                    if (updatedPlayers[myIdx].favoriteHaikuId === haiku.id) {
+                        updatedPlayers[myIdx].favoriteHaikuId = null;
+                    } else {
+                        updatedPlayers[myIdx].favoriteHaikuId = haiku.id;
+                    }
+
+                    await updateDoc(doc(db, "rooms", this.roomId), { players: updatedPlayers });
+                },
+
+                getHaikuText(haikuId) {
+                    const h = this.allGameHaikus.find(x => x.id === haikuId);
+                    if (!h) return '不明な俳句';
+                    return `${h.top.text} ${h.middle.text} ${h.bottom.text}`;
+                },
+
+                getFavoritedHaikusSummary() {
+                    const map = new Map();
+                    this.players.forEach(p => {
+                        if (!p.favoriteHaikuId) return;
+                        const h = this.allGameHaikus.find(x => x.id === p.favoriteHaikuId);
+                        if (!h) return;
+                        if (!map.has(h.id)) {
+                            map.set(h.id, { haiku: h, fanNames: [] });
+                        }
+                        map.get(h.id).fanNames.push(p.name);
+                    });
+                    return Array.from(map.values());
+                },
+
+                getFavoritedHaikuObjects() {
+                    const ids = new Set();
+                    this.players.forEach(p => {
+                        if (p.favoriteHaikuId) ids.add(p.favoriteHaikuId);
+                    });
+                    const list = [];
+                    ids.forEach(id => {
+                        const h = this.allGameHaikus.find(x => x.id === id);
+                        if (h) list.push(h);
+                    });
+                    return list;
+                },
+
+                // --- 殿堂入りヘルパー ---
+                toggleHallOfFameDetail(id) {
+                    if (this.expandedRecordId === id) this.expandedRecordId = null;
+                    else this.expandedRecordId = id;
+                },
+
+                getPlayerNameFromRecord(record, uid) {
+                    const p = record.players.find(x => x.uid === uid);
+                    return p ? p.name : '不明';
+                },
+
+                getHaikuTextFromRecord(record, haikuId) {
+                    let h = record.mvpHaikus ? record.mvpHaikus.find(x => x.id === haikuId) : null;
+                    if (!h && record.favoriteHaikusData) {
+                        h = record.favoriteHaikusData.find(x => x.id === haikuId);
+                    }
+                    if (!h) return '記録なし';
+                    return `${h.top.text} ${h.middle.text} ${h.bottom.text}`;
+                },
+
+                getFavoritedHaikusFromRecord(record) {
+                    if (!record.players) return [];
+                    const map = new Map();
+                    record.players.forEach(p => {
+                        if (!p.favoriteHaikuId) return;
+                        let h = record.mvpHaikus ? record.mvpHaikus.find(x => x.id === p.favoriteHaikuId) : null;
+                        if (!h && record.favoriteHaikusData) {
+                            h = record.favoriteHaikusData.find(x => x.id === p.favoriteHaikuId);
+                        }
+                        if (!h) return;
+                        if (!map.has(h.id)) {
+                            map.set(h.id, { haiku: h, fanNames: [] });
+                        }
+                        map.get(h.id).fanNames.push(p.name);
+                    });
+                    return Array.from(map.values());
                 },
 
                 async openHallOfFame() {
