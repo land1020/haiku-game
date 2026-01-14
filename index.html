@@ -703,6 +703,23 @@
                         settings.genreNeta || 0 }}
                     </div>
                 </div>
+
+                <!-- 俳句演出読み上げ設定 -->
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-weight:bold;">🔊 俳句演出時の音声読み上げ</label>
+                    <div v-if="isMeMaster" style="margin-top:5px;">
+                        <label style="display:inline-flex; align-items:center; gap:5px; cursor:pointer;">
+                            <input type="checkbox" v-model="tempSettings.speechEnabled" @change="saveSettings">
+                            <span>読み上げを有効にする</span>
+                        </label>
+                        <p style="font-size:0.75rem; color:#666; margin-top:3px;">
+                            ※ 俳句演出ON時に5・7・5のリズムで読み上げます
+                        </p>
+                    </div>
+                    <div v-else style="font-size:0.9rem;">
+                        {{ settings.speechEnabled ? '🔊 読み上げON' : '🔇 読み上げOFF' }}
+                    </div>
+                </div>
             </div>
 
             <div v-if="isMeMaster" style="text-align:center;">
@@ -1330,7 +1347,7 @@
             { text: "踏んでくれ", type: 5, score: 3, isOni: false, genre: "abnormal" },
             { text: "首輪つけ", type: 5, score: 3, isOni: false, genre: "abnormal" },
             { text: "ムッチムチ", type: 5, score: 2, isOni: false, genre: "abnormal" },
-            { text: "主従関係", type: 5, score: 3, isOni: false, genre: "abnormal" }, // じゅ(1)じゅう(2)かん(2)けい(2) ※リズム的に許容範囲
+            { text: "主従関係", type: 5, score: 3, isOni: false, genre: "abnormal" },
             { text: "洗脳済", type: 5, score: 3, isOni: false, genre: "abnormal" },
             { text: "四つん這い", type: 5, score: 3, isOni: false, genre: "abnormal" },
             { text: "肉便器", type: 5, score: 2, isOni: false, genre: "abnormal" },
@@ -1426,7 +1443,7 @@
 
             // --- 【追加分】7文字 (中) ---
             // <日常・シチュエーション: 1点>
-            { text: "脚ピンオナニー", type: 7, score: 1, isOni: false, genre: "abnormal" }, // 字余りだが勢い
+            { text: "脚ピンオナニー", type: 7, score: 1, isOni: false, genre: "abnormal" },
             { text: "分からせえっち", type: 7, score: 1, isOni: false, genre: "abnormal" },
             { text: "寝取られ報告", type: 7, score: 1, isOni: false, genre: "abnormal" },
             { text: "子作りえっち", type: 7, score: 1, isOni: false, genre: "abnormal" },
@@ -1515,7 +1532,7 @@
 
 
             // <鬼札（高得点・インパクト）: 10点>
-            { text: "種付けプレス", type: 7, score: 10, isOni: true, genre: "neta" }, // ガチャ用語
+            { text: "種付けプレス", type: 7, score: 10, isOni: true, genre: "neta" },
             { text: "射精懇願", type: 7, score: 10, isOni: true, genre: "abnormal" },
             { text: "大量失禁", type: 7, score: 10, isOni: true, genre: "abnormal" },
             { text: "ふたなり巨乳", type: 7, score: 15, isOni: true, genre: "abnormal" },
@@ -1650,7 +1667,8 @@
                         handSizeSeven: 5,
                         genreNormal: 0,
                         genreAbnormal: 10,
-                        genreNeta: 0
+                        genreNeta: 0,
+                        speechEnabled: false // 俳句演出読み上げ
                     },
                     tempSettings: { // 編集用
                         timeLimitMin: 5,
@@ -1662,7 +1680,8 @@
                         handSizeSeven: 5,
                         genreNormal: 0,
                         genreAbnormal: 10,
-                        genreNeta: 0
+                        genreNeta: 0,
+                        speechEnabled: false // 俳句演出読み上げ
                     },
                     roundStartTime: null,
                     timeLeft: 0,
@@ -2007,6 +2026,7 @@
                                     this.tempSettings.genreNormal = this.settings.genreNormal || 0;
                                     this.tempSettings.genreAbnormal = this.settings.genreAbnormal || 10;
                                     this.tempSettings.genreNeta = this.settings.genreNeta || 0;
+                                    this.tempSettings.speechEnabled = this.settings.speechEnabled || false;
                                 }
                             } else {
                                 this.viewState = 'GAME';
@@ -2097,7 +2117,13 @@
                     this.specialEffectHaiku = next;
                     this.showSpecialEffectOverlay = true;
 
-                    // 5秒後に次へ
+                    // 音声読み上げが有効な場合
+                    if (this.settings.speechEnabled) {
+                        this.speakHaiku(next);
+                    }
+
+                    // 7秒後に次へ（読み上げ時間を考慮）
+                    const duration = this.settings.speechEnabled ? 8000 : 5000;
                     setTimeout(() => {
                         this.showSpecialEffectOverlay = false; // 一旦消す（フェードアウト用）
 
@@ -2109,7 +2135,41 @@
                         } else {
                             this.specialEffectHaiku = null;
                         }
-                    }, 5000);
+                    }, duration);
+                },
+
+                // --- 俳句読み上げ ---
+                speakHaiku(haiku) {
+                    if (!window.speechSynthesis) {
+                        console.warn('Speech Synthesis not supported');
+                        return;
+                    }
+
+                    // 読み上げ中のものをキャンセル
+                    window.speechSynthesis.cancel();
+
+                    // ❤記号を除去
+                    const cleanText = (text) => text.replace(/[❤️❤]/g, '').trim();
+
+                    const top = cleanText(haiku.top.text);
+                    const middle = cleanText(haiku.middle.text);
+                    const bottom = cleanText(haiku.bottom.text);
+
+                    // 5・7・5で間を空けて詠む
+                    const speakPart = (text, delay) => {
+                        setTimeout(() => {
+                            const utterance = new SpeechSynthesisUtterance(text);
+                            utterance.lang = 'ja-JP';
+                            utterance.rate = 0.85; // 少しゆっくり
+                            utterance.pitch = 1.0;
+                            window.speechSynthesis.speak(utterance);
+                        }, delay);
+                    };
+
+                    // 上五→中七→下五 の順に読む
+                    speakPart(top, 500);      // 0.5秒後に上五
+                    speakPart(middle, 2500);  // 2.5秒後に中七
+                    speakPart(bottom, 5000);  // 5秒後に下五
                 },
 
                 // --- UI表示用クラス ---
@@ -2432,7 +2492,8 @@
                         handSizeSeven: this.tempSettings.handSizeSeven,
                         genreNormal: this.tempSettings.genreNormal,
                         genreAbnormal: this.tempSettings.genreAbnormal,
-                        genreNeta: this.tempSettings.genreNeta
+                        genreNeta: this.tempSettings.genreNeta,
+                        speechEnabled: this.tempSettings.speechEnabled
                     };
                     await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
                 },
