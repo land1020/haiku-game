@@ -1616,6 +1616,65 @@
             };
         }
 
+        // 全プレイヤー分の手札を生成（プレイヤー間で重複なし）
+        function generateHandsForAllPlayers(playerCount, count5 = 5, count7 = 7, genreRatios = { normal: 0, abnormal: 10, neta: 0 }) {
+            const totalRatio = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
+            if (totalRatio === 0) {
+                genreRatios = { normal: 0, abnormal: 10, neta: 0 };
+            }
+
+            const pickOneByGenre = (available) => {
+                const total = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
+                const rand = Math.random() * total;
+                let genre;
+                if (rand < genreRatios.normal) {
+                    genre = "normal";
+                } else if (rand < genreRatios.normal + genreRatios.abnormal) {
+                    genre = "abnormal";
+                } else {
+                    genre = "neta";
+                }
+
+                const candidates = available.filter(w => w.genre === genre);
+                if (candidates.length === 0) {
+                    return available[Math.floor(Math.random() * available.length)];
+                }
+                return candidates[Math.floor(Math.random() * candidates.length)];
+            };
+
+            const fivesPool = [...WORD_DICTIONARY.filter(w => w.type === 5)];
+            const sevensPool = [...WORD_DICTIONARY.filter(w => w.type === 7)];
+            const hands = [];
+
+            for (let p = 0; p < playerCount; p++) {
+                const hand = { fives: [], sevens: [] };
+
+                // 5文字カードを配布
+                for (let i = 0; i < count5 && fivesPool.length > 0; i++) {
+                    const word = pickOneByGenre(fivesPool);
+                    const idx = fivesPool.findIndex(w => w.text === word.text);
+                    if (idx !== -1) {
+                        fivesPool.splice(idx, 1);
+                        hand.fives.push({ ...word, id: Math.random().toString(36).substr(2, 9) });
+                    }
+                }
+
+                // 7文字カードを配布
+                for (let i = 0; i < count7 && sevensPool.length > 0; i++) {
+                    const word = pickOneByGenre(sevensPool);
+                    const idx = sevensPool.findIndex(w => w.text === word.text);
+                    if (idx !== -1) {
+                        sevensPool.splice(idx, 1);
+                        hand.sevens.push({ ...word, id: Math.random().toString(36).substr(2, 9) });
+                    }
+                }
+
+                hands.push(hand);
+            }
+
+            return hands;
+        }
+
         createApp({
             data() {
                 return {
@@ -2521,20 +2580,22 @@
                         const randomIdx = Math.floor(Math.random() * this.players.length);
                         const nextMasterUid = this.players[randomIdx].uid;
 
-                        // 設定に合わせて手札を配り直す
+                        // 設定に合わせて手札を配り直す（プレイヤー間で重複なし）
                         const genreRatios = {
                             normal: this.tempSettings.genreNormal || 0,
                             abnormal: this.tempSettings.genreAbnormal || 10,
                             neta: this.tempSettings.genreNeta || 0
                         };
-                        const refreshedPlayers = this.players.map(p => {
+                        const allHands = generateHandsForAllPlayers(
+                            this.players.length,
+                            this.tempSettings.handSizeFive,
+                            this.tempSettings.handSizeSeven,
+                            genreRatios
+                        );
+                        const refreshedPlayers = this.players.map((p, idx) => {
                             return {
                                 ...p,
-                                hand: generateHand(
-                                    this.tempSettings.handSizeFive,
-                                    this.tempSettings.handSizeSeven,
-                                    genreRatios
-                                )
+                                hand: allHands[idx]
                             };
                         });
 
@@ -2624,8 +2685,14 @@
                             abnormal: this.settings.genreAbnormal || 10,
                             neta: this.settings.genreNeta || 0
                         };
-                        const refreshedPlayers = this.players.map(p => {
-                            return { ...p, hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven, genreRatios) };
+                        const allHands = generateHandsForAllPlayers(
+                            this.players.length,
+                            this.settings.handSizeFive,
+                            this.settings.handSizeSeven,
+                            genreRatios
+                        );
+                        const refreshedPlayers = this.players.map((p, idx) => {
+                            return { ...p, hand: allHands[idx] };
                         });
 
                         const newHistory = [...this.masterHistory];
@@ -2649,12 +2716,18 @@
                         abnormal: this.settings.genreAbnormal || 10,
                         neta: this.settings.genreNeta || 0
                     };
-                    const resetPlayers = this.players.map(p => ({
+                    const allHands = generateHandsForAllPlayers(
+                        this.players.length,
+                        this.settings.handSizeFive,
+                        this.settings.handSizeSeven,
+                        genreRatios
+                    );
+                    const resetPlayers = this.players.map((p, idx) => ({
                         ...p,
                         score: 0,
                         totalLikes: 0,
                         // winCountは維持される(pに含まれるため)
-                        hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven, genreRatios)
+                        hand: allHands[idx]
                     }));
                     const firstMaster = resetPlayers[0].uid;
 
