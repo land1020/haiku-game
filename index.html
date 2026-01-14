@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>性癖句会ロワイヤル - Online</title>
+    <title>性癖俳句ロワイヤル - Online</title>
     <!-- Vue.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.19/vue.global.prod.min.js"></script>
     <!-- フォント -->
@@ -510,7 +510,7 @@
     <div id="app" class="app-container" v-cloak>
 
         <div style="text-align: center;">
-            <div class="logo">性癖句会ロワイヤル</div>
+            <div class="logo">性癖俳句ロワイヤル</div>
         </div>
 
         <!-- 1. ロビー画面 -->
@@ -698,11 +698,6 @@
                 <span>第 {{ roundCount }} / {{ players.length }} 句</span>
                 <span>
                     親：{{ settings.showMaster ? getMasterName() : '???' }}
-                    <span v-if="gamePhase === 'WRITING' && timeLeft > 0"
-                        style="margin-left:10px; color:var(--accent-color);">
-                        残り {{ Math.floor(timeLeft / 60) }}:{{ ('0' + (timeLeft % 60)).slice(-2) }}
-                    </span>
-                    <span v-else-if="gamePhase === 'WRITING'" style="margin-left:10px; color:red;">終了！</span>
                 </span>
                 <button class="btn btn-danger" style="width:auto; padding:5px 10px; font-size:0.75rem;"
                     @click="leaveRoom">退出</button>
@@ -849,6 +844,18 @@
                             </div>
                         </div>
 
+                        <!-- タイマー表示 -->
+                        <div v-if="gamePhase === 'WRITING'"
+                            style="text-align:center; margin-bottom:10px; padding:8px; background:#fff3e0; border-radius:4px; border:1px solid #ffcc80;">
+                            <span v-if="timeLeft > 0"
+                                style="font-size:1.1rem; font-weight:bold; color:var(--accent-color);">
+                                ⏳ 残り {{ Math.floor(timeLeft / 60) }}:{{ ('0' + (timeLeft % 60)).slice(-2) }}
+                            </span>
+                            <span v-else style="font-size:1.1rem; font-weight:bold; color:red;">
+                                ⏰ 時間終了！
+                            </span>
+                        </div>
+
                         <button class="btn btn-primary" style="margin-top:10px;" @click="submitHaiku"
                             :disabled="!myDraft.top || !myDraft.middle || !myDraft.bottom">
                             詠む（提出）
@@ -907,10 +914,11 @@
                             {{ r }}位
                         </button>
                     </div>
-                    <!-- いいね・お気に入りボタン -->
-                    <div v-else-if="haiku.userId !== myUid"
+                    <!-- いいね・お気に入りボタン（自分の俳句以外に表示、親もお気に入り可能） -->
+                    <div v-if="haiku.userId !== myUid"
                         style="text-align:right; margin-top:5px; display:flex; justify-content:flex-end; gap:5px; flex-wrap:wrap;">
-                        <button @click="toggleLike(haiku)"
+                        <!-- いいねボタン（親以外のみ） -->
+                        <button v-if="!isMeMaster || settings.everyonePlays" @click="toggleLike(haiku)"
                             :disabled="hasLikedAny && !(haiku.likes && haiku.likes.includes(myUid))" :style="{
                                 background: (haiku.likes && haiku.likes.includes(myUid)) ? '#e91e63' : 'none',
                                 color: (haiku.likes && haiku.likes.includes(myUid)) ? 'white' : '#333',
@@ -922,7 +930,7 @@
                             }">
                             {{ (haiku.likes && haiku.likes.includes(myUid)) ? '❤️ いいね済' : '🤍 いいね' }}
                         </button>
-                        <!-- お気に入りボタン (各自1個・上書き可) -->
+                        <!-- お気に入りボタン (全員利用可能) -->
                         <button @click="toggleFavorite(haiku)" :style="{
                             background: (getMyFavoriteHaikuId() === haiku.id) ? 'var(--fav-color)' : 'none',
                             color: (getMyFavoriteHaikuId() === haiku.id) ? 'white' : '#333',
