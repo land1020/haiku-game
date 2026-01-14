@@ -674,6 +674,35 @@
                         {{ settings.likePoints }} 点
                     </div>
                 </div>
+
+                <!-- ジャンル配分設定 -->
+                <div style="margin-bottom:10px; padding:10px; background:#f5f5f5; border-radius:4px;">
+                    <label style="display:block; font-weight:bold; margin-bottom:8px;">🎭 ジャンル配分</label>
+                    <p style="font-size:0.75rem; color:#666; margin-bottom:8px;">
+                        数値の比率でワードが選出されます（例: 3:6:1 → ノーマル30%）
+                    </p>
+                    <div v-if="isMeMaster" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                        <div style="text-align:center;">
+                            <label style="font-size:0.8rem; color:#2e8b57;">ノーマル</label><br>
+                            <input type="number" v-model.number="tempSettings.genreNormal" min="0" max="10"
+                                style="width:50px; padding:5px; text-align:center;" @change="saveSettings">
+                        </div>
+                        <div style="text-align:center;">
+                            <label style="font-size:0.8rem; color:#b93a32;">アブノーマル</label><br>
+                            <input type="number" v-model.number="tempSettings.genreAbnormal" min="0" max="10"
+                                style="width:50px; padding:5px; text-align:center;" @change="saveSettings">
+                        </div>
+                        <div style="text-align:center;">
+                            <label style="font-size:0.8rem; color:#800080;">ネタ</label><br>
+                            <input type="number" v-model.number="tempSettings.genreNeta" min="0" max="10"
+                                style="width:50px; padding:5px; text-align:center;" @change="saveSettings">
+                        </div>
+                    </div>
+                    <div v-else style="font-size:0.9rem; text-align:center;">
+                        ノーマル:{{ settings.genreNormal || 0 }} / アブノーマル:{{ settings.genreAbnormal || 10 }} / ネタ:{{
+                        settings.genreNeta || 0 }}
+                    </div>
+                </div>
             </div>
 
             <div v-if="isMeMaster" style="text-align:center;">
@@ -1261,257 +1290,298 @@
         }
 
         // --- 辞書データ ---
+        // genre: "normal"(ノーマル), "abnormal"(アブノーマル), "neta"(ネタ)
         const WORD_DICTIONARY = [
-            // 【5文字 (上/下)】通常1点, スパイス2-3点, 鬼10点
-            { text: "夢の中", type: 5, score: 1, isOni: false },
-            { text: "お風呂場で", type: 5, score: 1, isOni: false },
-            { text: "全裸待機", type: 5, score: 10, isOni: true },
-            { text: "即落ちで", type: 5, score: 10, isOni: true },
-            { text: "バブみある", type: 5, score: 10, isOni: true },
-            { text: "触手攻め", type: 5, score: 10, isOni: true },
+            // 【５文字 (上/下)】通常１点, スパイス２-３点, 鬐１０点
+            { text: "夢の中", type: 5, score: 1, isOni: false, genre: "abnormal" },
+            { text: "お風呂場で", type: 5, score: 1, isOni: false, genre: "abnormal" },
+            { text: "全裸待機", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "即落ちで", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "バブみある", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "触手攻め", type: 5, score: 10, isOni: true, genre: "abnormal" },
 
             // 【7文字 (中)】
-            { text: "声が漏れちゃう", type: 7, score: 3, isOni: false },
-            { text: "汗ばんだ肌", type: 7, score: 2, isOni: false },
-            { text: "スカートまくり", type: 7, score: 3, isOni: false },
-            { text: "壁に押し付け", type: 7, score: 2, isOni: false },
-            { text: "耳元で言う", type: 7, score: 2, isOni: false },
-            { text: "理性が飛んで", type: 7, score: 3, isOni: false },
-            { text: "ギリギリ見えた", type: 7, score: 2, isOni: false },
-            { text: "絶対服従", type: 7, score: 3, isOni: false },
-            { text: "限界すぎて", type: 7, score: 2, isOni: false },
-            { text: "絶頂迎える", type: 7, score: 3, isOni: false },
-            { text: "社会の窓が", type: 7, score: 10, isOni: true },
+            { text: "声が漏れちゃう", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "汗ばんだ肌", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "スカートまくり", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "壁に押し付け", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "耳元で言う", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "理性が飛んで", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "ギリギリ見えた", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "絶対服従", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "限界すぎて", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "絶頂迎える", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "社会の窓が", type: 7, score: 10, isOni: true, genre: "abnormal" },
 
             // --- 【追加分】5文字 (上/下) ---
             // <日常・シチュエーション: 1点>
-            { text: "体育館", type: 5, score: 1, isOni: false },
-            { text: "会社にて", type: 5, score: 1, isOni: false },
-            { text: "エレベーター", type: 5, score: 1, isOni: false },
-            { text: "終電で", type: 5, score: 1, isOni: false },
-            { text: "雨の中", type: 5, score: 1, isOni: false },
-            { text: "飲み会で", type: 5, score: 1, isOni: false },
-            { text: "ピンサロで", type: 5, score: 1, isOni: false },
-            { text: "文化祭", type: 5, score: 1, isOni: false },
+            { text: "体育館", type: 5, score: 1, isOni: false, genre: "normal" },
+            { text: "会社にて", type: 5, score: 1, isOni: false, genre: "normal" },
+            { text: "エレベーター", type: 5, score: 1, isOni: false, genre: "normal" },
+            { text: "終電で", type: 5, score: 1, isOni: false, genre: "normal" },
+            { text: "雨の中", type: 5, score: 1, isOni: false, genre: "normal" },
+            { text: "飲み会で", type: 5, score: 1, isOni: false, genre: "normal" },
+            { text: "ピンサロで", type: 5, score: 1, isOni: false, genre: "abnormal" },
+            { text: "文化祭", type: 5, score: 1, isOni: false, genre: "normal" },
 
             // <スパイス（性癖・感情）: 2-3点>
-            { text: "団地妻", type: 5, score: 2, isOni: false },
-            { text: "泣き叫ぶ", type: 5, score: 2, isOni: false },
-            { text: "踏んでくれ", type: 5, score: 3, isOni: false },
-            { text: "首輪つけ", type: 5, score: 3, isOni: false },
-            { text: "ムッチムチ", type: 5, score: 2, isOni: false },
-            { text: "主従関係", type: 5, score: 3, isOni: false }, // じゅ(1)じゅう(2)かん(2)けい(2) ※リズム的に許容範囲
-            { text: "洗脳済", type: 5, score: 3, isOni: false },
-            { text: "四つん這い", type: 5, score: 3, isOni: false },
-            { text: "肉便器", type: 5, score: 2, isOni: false },
-            { text: "寝取られて", type: 5, score: 3, isOni: false },
-            { text: "推しの子が", type: 5, score: 2, isOni: false },
-            { text: "催眠で", type: 5, score: 3, isOni: false },
-            { text: "無表情", type: 5, score: 2, isOni: false },
-            { text: "高笑い", type: 5, score: 2, isOni: false },
-            { text: "生配信", type: 5, score: 2, isOni: false },
-            { text: "乳首責め", type: 5, score: 2, isOni: false },
-            { text: "百合えっち", type: 5, score: 2, isOni: false },
-            { text: "お嬢様", type: 5, score: 2, isOni: false },
-            { text: "ビデオレター", type: 5, score: 2, isOni: false },
-            { text: "美人秘書", type: 5, score: 2, isOni: false },
-            { text: "おじチンポ", type: 5, score: 2, isOni: false },
-            { text: "ショタちんこ", type: 5, score: 2, isOni: false },
-            { text: "初体験", type: 5, score: 2, isOni: false },
-            { text: "筆おろし", type: 5, score: 2, isOni: false },
-            { text: "断面図", type: 5, score: 2, isOni: false },
-            { text: "着衣えろ", type: 5, score: 2, isOni: false },
-            { text: "親子丼", type: 5, score: 2, isOni: false },
-            { text: "感覚遮断", type: 5, score: 2, isOni: false },
-            { text: "ぶっともも", type: 5, score: 2, isOni: false },
-            { text: "うわキッツ", type: 5, score: 2, isOni: false },
-            { text: "フル勃起", type: 5, score: 2, isOni: false },
-            { text: "モブおじさん", type: 5, score: 2, isOni: false },
-            { text: "エロ睡眠", type: 5, score: 2, isOni: false },
-            { text: "姫はじめ", type: 5, score: 2, isOni: false },
-            { text: "うわデッカ", type: 5, score: 3, isOni: false },
-            { text: "年齢差", type: 5, score: 2, isOni: false },
-            { text: "地味眼鏡", type: 5, score: 3, isOni: false },
-            { text: "体格差", type: 5, score: 2, isOni: false },
-            { text: "経産婦", type: 5, score: 2, isOni: false },
-            { text: "発情期", type: 5, score: 2, isOni: false },
-            { text: "オナホばれ", type: 5, score: 5, isOni: false },
-            { text: "押し倒し", type: 5, score: 2, isOni: false },
-            { text: "行きずりの", type: 5, score: 2, isOni: false },
-            { text: "バイアグラ", type: 5, score: 2, isOni: false },
-            { text: "パイズリで", type: 5, score: 2, isOni: false },
-            { text: "立ちバック", type: 5, score: 2, isOni: false },
-            { text: "旦那様", type: 5, score: 2, isOni: false },
-            { text: "イケメンと", type: 5, score: 5, isOni: false },
-            { text: "おパンティ", type: 5, score: 2, isOni: false },
-            { text: "ど変態", type: 5, score: 2, isOni: false },
-            { text: "今日しよう❤", type: 5, score: 2, isOni: false },
-            { text: "中でいいよ❤", type: 5, score: 2, isOni: false },
-            { text: "パン❤パン❤パン❤", type: 5, score: 2, isOni: false },
-            { text: "Oh.YES", type: 5, score: 5, isOni: false },
-            { text: "どびゅるるる", type: 5, score: 3, isOni: false },
-            { text: "ぐっちょぐちょ", type: 5, score: 2, isOni: false },
-            { text: "ぶぼぼもわぁ", type: 5, score: 8, isOni: false },
-            { text: "おまんこに", type: 5, score: 2, isOni: false },
-            { text: "ケツを出せ", type: 5, score: 5, isOni: false },
-            { text: "風俗嬢", type: 5, score: 2, isOni: false },
-            { text: "交尾中", type: 5, score: 2, isOni: false },
-            { text: "や・ら・な・い・か", type: 5, score: 8, isOni: false },
-            { text: "風俗嬢", type: 5, score: 2, isOni: false },
-            { text: "女王様", type: 5, score: 2, isOni: false },
-            { text: "拘束具", type: 5, score: 5, isOni: false },
-            { text: "色仕掛け", type: 5, score: 2, isOni: false },
-            { text: "言葉責め", type: 5, score: 2, isOni: false },
-            { text: "誘い受け", type: 5, score: 2, isOni: false },
-            { text: "VTuber", type: 5, score: 5, isOni: false },
-            { text: "ぬるっぬる", type: 5, score: 3, isOni: false },
-            { text: "ヌぷぷぷぷッ", type: 5, score: 7, isOni: false },
-            { text: "ちんあなご", type: 5, score: 2, isOni: false },
-            { text: "一時間", type: 5, score: 2, isOni: false },
-            { text: "スケベ椅子", type: 5, score: 2, isOni: false },
-            { text: "隠し撮り", type: 5, score: 4, isOni: false },
-            { text: "まんこくぱぁ", type: 5, score: 2, isOni: false },
-            { text: "露出狂", type: 5, score: 2, isOni: false },
-            { text: "エネマグラ", type: 5, score: 5, isOni: false },
-            { text: "猿ぐつわ", type: 5, score: 2, isOni: false },
-            { text: "不倫行為", type: 5, score: 2, isOni: false },
-            { text: "あん❤あん❤あん❤", type: 5, score: 2, isOni: false },
+            { text: "団地妻", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "泣き叫ぶ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "踏んでくれ", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "首輪つけ", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "ムッチムチ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "主従関係", type: 5, score: 3, isOni: false, genre: "abnormal" }, // じゅ(1)じゅう(2)かん(2)けい(2) ※リズム的に許容範囲
+            { text: "洗脳済", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "四つん這い", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "肉便器", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "寝取られて", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "推しの子が", type: 5, score: 2, isOni: false, genre: "neta" },
+            { text: "催眠で", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "無表情", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "高笑い", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "生配信", type: 5, score: 2, isOni: false, genre: "normal" },
+            { text: "乳首責め", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "百合えっち", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "お嬢様", type: 5, score: 2, isOni: false, genre: "normal" },
+            { text: "ビデオレター", type: 5, score: 2, isOni: false, genre: "normal" },
+            { text: "美人秘書", type: 5, score: 2, isOni: false, genre: "normal" },
+            { text: "おじチンポ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ショタちんこ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "初体験", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "筆おろし", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "断面図", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "着衣えろ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "親子丼", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "感覚遮断", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ぶっともも", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "うわキッツ", type: 5, score: 2, isOni: false, genre: "neta" },
+            { text: "フル勃起", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "モブおじさん", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "エロ睡眠", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "姫はじめ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "うわデッカ", type: 5, score: 3, isOni: false, genre: "neta" },
+            { text: "年齢差", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "地味眼鏡", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "体格差", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "経産婦", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "発情期", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "オナホばれ", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "押し倒し", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "行きずりの", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "バイアグラ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "パイズリで", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "立ちバック", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "旦那様", type: 5, score: 2, isOni: false, genre: "normal" },
+            { text: "イケメンと", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "おパンティ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ど変態", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "今日しよう❤", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "中でいいよ❤", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "パン❤パン❤パン❤", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "Oh.YES", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "どびゅるるる", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "ぐっちょぐちょ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ぶぼぼもわぁ", type: 5, score: 8, isOni: false, genre: "abnormal" },
+            { text: "おまんこに", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ケツを出せ", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "風俗嬢", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "交尾中", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "や・ら・な・い・か", type: 5, score: 8, isOni: false, genre: "neta" },
+            { text: "風俗嬢", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "女王様", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "拘束具", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "色仕掛け", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "言葉責め", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "誘い受け", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "VTuber", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "ぬるっぬる", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "ヌぷぷぷぷッ", type: 5, score: 7, isOni: false, genre: "abnormal" },
+            { text: "ちんあなご", type: 5, score: 2, isOni: false, genre: "neta" },
+            { text: "一時間", type: 5, score: 2, isOni: false, genre: "normal" },
+            { text: "スケベ椅子", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "隠し撮り", type: 5, score: 4, isOni: false, genre: "abnormal" },
+            { text: "まんこくぱぁ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "露出狂", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "エネマグラ", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "猿ぐつわ", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "不倫行為", type: 5, score: 2, isOni: false, genre: "abnormal" },
+            { text: "あん❤あん❤あん❤", type: 5, score: 2, isOni: false, genre: "abnormal" },
 
             // <鬼札（高得点・インパクト）: 10点>
-            { text: "デスアクメ", type: 5, score: 10, isOni: true },
-            { text: "ケツアクメ", type: 5, score: 10, isOni: true },
-            { text: "フル勃起", type: 5, score: 10, isOni: true },
-            { text: "黒歴史", type: 5, score: 10, isOni: true },
-            { text: "ザコまんこ", type: 5, score: 10, isOni: true },
-            { text: "尊厳破壊", type: 5, score: 10, isOni: true },
-            { text: "鬱勃起", type: 5, score: 10, isOni: true },
-            { text: "二穴責め", type: 5, score: 10, isOni: true },
-            { text: "授乳コキ", type: 5, score: 10, isOni: true },
-            { text: "逆レイプ", type: 5, score: 10, isOni: true },
-            { text: "無様エロ", type: 5, score: 10, isOni: true },
-            { text: "イマラチオ", type: 5, score: 10, isOni: true },
-            { text: "あんたバカぁ？", type: 5, score: 20, isOni: true },
-            { text: "ユニコーン！！", type: 5, score: 15, isOni: true },
-            { text: "やらせはせん", type: 5, score: 10, isOni: true },
+            { text: "デスアクメ", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "ケツアクメ", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "フル勃起", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "黒歴史", type: 5, score: 10, isOni: true, genre: "neta" },
+            { text: "ザコまんこ", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "尊厳破壊", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "鬱勃起", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "二穴責め", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "授乳コキ", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "逆レイプ", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "無様エロ", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "イマラチオ", type: 5, score: 10, isOni: true, genre: "abnormal" },
+            { text: "あんたバカぁ？", type: 5, score: 20, isOni: true, genre: "neta" },
+            { text: "ユニコーン！！", type: 5, score: 15, isOni: true, genre: "neta" },
+            { text: "やらせはせん", type: 5, score: 10, isOni: true, genre: "neta" },
 
             // --- 【追加分】7文字 (中) ---
             // <日常・シチュエーション: 1点>
-            { text: "脚ピンオナニー", type: 7, score: 1, isOni: false }, // 字余りだが勢い
-            { text: "分からせえっち", type: 7, score: 1, isOni: false },
-            { text: "寝取られ報告", type: 7, score: 1, isOni: false },
-            { text: "子作りえっち", type: 7, score: 1, isOni: false },
-            { text: "裸エプロン", type: 7, score: 1, isOni: false },
+            { text: "脚ピンオナニー", type: 7, score: 1, isOni: false, genre: "abnormal" }, // 字余りだが勢い
+            { text: "分からせえっち", type: 7, score: 1, isOni: false, genre: "abnormal" },
+            { text: "寝取られ報告", type: 7, score: 1, isOni: false, genre: "abnormal" },
+            { text: "子作りえっち", type: 7, score: 1, isOni: false, genre: "abnormal" },
+            { text: "裸エプロン", type: 7, score: 1, isOni: false, genre: "abnormal" },
 
             // <スパイス（性癖・感情）: 2-3点>
-            { text: "射精懇願", type: 7, score: 2, isOni: false },
-            { text: "陥没乳首", type: 7, score: 3, isOni: false },
-            { text: "射精管理で", type: 7, score: 3, isOni: false },
-            { text: "M字開脚", type: 7, score: 3, isOni: false },
-            { text: "連続絶頂", type: 7, score: 2, isOni: false },
-            { text: "絶叫痙攣", type: 7, score: 3, isOni: false },
-            { text: "おしっこ我慢", type: 7, score: 3, isOni: false },
-            { text: "ぴっちりスーツ", type: 7, score: 2, isOni: false },
-            { text: "睡眠アプリ", type: 7, score: 3, isOni: false },
-            { text: "感度千倍", type: 7, score: 3, isOni: false },
-            { text: "逆レイプ", type: 7, score: 2, isOni: false },
-            { text: "おちんぽみるく", type: 7, score: 5, isOni: false },
-            { text: "アナルセックス", type: 7, score: 5, isOni: false },
-            { text: "シックスナイン", type: 7, score: 5, isOni: false },
-            { text: "ニプルファック", type: 7, score: 2, isOni: false },
-            { text: "フィストファック", type: 7, score: 2, isOni: false },
-            { text: "口内射精", type: 7, score: 2, isOni: false },
-            { text: "援助交際", type: 7, score: 2, isOni: false },
-            { text: "複数プレイ", type: 7, score: 2, isOni: false },
-            { text: "顔面騎乗", type: 7, score: 2, isOni: false },
-            { text: "クンニリングス", type: 7, score: 2, isOni: false },
-            { text: "まんぐり返し", type: 7, score: 2, isOni: false },
-            { text: "オナホを使って", type: 7, score: 2, isOni: false },
-            { text: "隣の部屋で", type: 7, score: 2, isOni: false },
-            { text: "アヘ顔晒す", type: 7, score: 4, isOni: false },
-            { text: "ビデオ回して", type: 7, score: 2, isOni: false },
-            { text: "言いなりになる", type: 7, score: 2, isOni: false },
-            { text: "何度もイっちゃう", type: 7, score: 2, isOni: false },
-            { text: "ナカで暴れる", type: 7, score: 2, isOni: false },
-            { text: "ガマンできずに", type: 7, score: 2, isOni: false },
-            { text: "気持ちよすぎて", type: 7, score: 2, isOni: false },
-            { text: "奥まで届く", type: 7, score: 2, isOni: false },
-            { text: "腰が砕ける", type: 7, score: 3, isOni: false },
-            { text: "女を抱いて", type: 7, score: 2, isOni: false },
-            { text: "騎乗位キメて", type: 7, score: 4, isOni: false },
-            { text: "いちゃらぶえっち", type: 7, score: 3, isOni: false },
-            { text: "バキバキ童貞", type: 7, score: 6, isOni: false },
-            { text: "アナルなめなめ", type: 7, score: 5, isOni: false },
-            { text: "ピストン運動", type: 7, score: 2, isOni: false },
-            { text: "チンコを舐める", type: 7, score: 2, isOni: false },
-            { text: "がんばれ❤がんばれ❤", type: 7, score: 2, isOni: false },
-            { text: "ローションプレイ", type: 7, score: 2, isOni: false },
-            { text: "ローター散歩", type: 7, score: 4, isOni: false },
-            { text: "異物挿入", type: 7, score: 7, isOni: false },
-            { text: "バイブレーション", type: 7, score: 2, isOni: false },
-            { text: "スパンキングで", type: 7, score: 2, isOni: false },
-            { text: "ぽこちん蹴り上げ", type: 7, score: 9, isOni: false },
-            { text: "双頭ディルド", type: 7, score: 2, isOni: false },
-            { text: "即ハメえっち", type: 7, score: 2, isOni: false },
-            { text: "ワンナイトラブ", type: 7, score: 2, isOni: false },
-            { text: "数の子天井", type: 7, score: 2, isOni: false },
-            { text: "仮性包茎", type: 7, score: 2, isOni: false },
-            { text: "ドリルちんちん", type: 7, score: 5, isOni: false },
-            { text: "尻コキえっち", type: 7, score: 2, isOni: false },
-            { text: "足コキえっち", type: 7, score: 2, isOni: false },
-            { text: "パイズリえっち", type: 7, score: 2, isOni: false },
-            { text: "うるせぇ!!いこう!!", type: 7, score: 6, isOni: false },
-            { text: "心を燃やせ", type: 7, score: 5, isOni: false },
-            { text: "駅弁大好き❤", type: 7, score: 5, isOni: false },
-            { text: "ディープスロート", type: 7, score: 2, isOni: false },
-            { text: "一人尺八", type: 7, score: 2, isOni: false },
-            { text: "中出しセックス", type: 7, score: 2, isOni: false },
-            { text: "子作りセックス", type: 7, score: 4, isOni: false },
-            { text: "ピンクローター", type: 7, score: 2, isOni: false },
-            { text: "三角木馬", type: 7, score: 2, isOni: false },
-            { text: "オホ声響く", type: 7, score: 2, isOni: false },
-            { text: "一生懸命", type: 7, score: 2, isOni: false },
-            { text: "公衆面前", type: 7, score: 3, isOni: false },
-            { text: "公衆トイレ", type: 7, score: 3, isOni: false },
-            { text: "亀甲縛り", type: 7, score: 2, isOni: false },
-            { text: "チンカス香る", type: 7, score: 2, isOni: false },
-            { text: "ぽこちんフィーバー", type: 7, score: 6, isOni: false },
-            { text: "おしりを舐める", type: 7, score: 2, isOni: false },
-            { text: "子宮恋愛", type: 7, score: 2, isOni: false },
-            { text: "イク❤イク❤イっちゃう❤", type: 7, score: 6, isOni: false },
-            { text: "くぎ打ち騎乗位", type: 7, score: 4, isOni: false },
-            { text: "除毛プレイで", type: 7, score: 2, isOni: false },
-            { text: "拘束電マ", type: 7, score: 2, isOni: false },
-            { text: "高速ピストン", type: 7, score: 2, isOni: false },
+            { text: "射精懇願", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "陥没乳首", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "射精管理で", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "M字開脚", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "連続絶頂", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "絶叫痙攣", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "おしっこ我慢", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "ぴっちりスーツ", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "睡眠アプリ", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "感度千倍", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "逆レイプ", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "おちんぽみるく", type: 7, score: 5, isOni: false, genre: "abnormal" },
+            { text: "アナルセックス", type: 7, score: 5, isOni: false, genre: "abnormal" },
+            { text: "シックスナイン", type: 7, score: 5, isOni: false, genre: "abnormal" },
+            { text: "ニプルファック", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "フィストファック", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "口内射精", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "援助交際", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "複数プレイ", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "顔面騎乗", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "クンニリングス", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "まんぐり返し", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "オナホを使って", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "隣の部屋で", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "アヘ顔晒す", type: 7, score: 4, isOni: false, genre: "abnormal" },
+            { text: "ビデオ回して", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "言いなりになる", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "何度もイっちゃう", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ナカで暴れる", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ガマンできずに", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "気持ちよすぎて", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "奥まで届く", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "腰が砕ける", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "女を抱いて", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "騎乗位キメて", type: 7, score: 4, isOni: false, genre: "abnormal" },
+            { text: "いちゃらぶえっち", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "バキバキ童貞", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "アナルなめなめ", type: 7, score: 5, isOni: false, genre: "abnormal" },
+            { text: "ピストン運動", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "チンコを舐める", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "がんばれ❤がんばれ❤", type: 7, score: 2, isOni: false, genre: "neta" },
+            { text: "ローションプレイ", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ローター散歩", type: 7, score: 4, isOni: false, genre: "abnormal" },
+            { text: "異物挿入", type: 7, score: 7, isOni: false, genre: "abnormal" },
+            { text: "バイブレーション", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "スパンキングで", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ぽこちん蹴り上げ", type: 7, score: 9, isOni: false, genre: "abnormal" },
+            { text: "双頭ディルド", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "即ハメえっち", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ワンナイトラブ", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "数の子天井", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "仮性包茎", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ドリルちんちん", type: 7, score: 5, isOni: false, genre: "abnormal" },
+            { text: "尻コキえっち", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "足コキえっち", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "パイズリえっち", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "うるせぇ!!いこう!!", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "心を燃やせ", type: 7, score: 5, isOni: false, genre: "neta" },
+            { text: "駅弁大好き❤", type: 7, score: 5, isOni: false, genre: "abnormal" },
+            { text: "ディープスロート", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "一人尺八", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "中出しセックス", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "子作りセックス", type: 7, score: 4, isOni: false, genre: "abnormal" },
+            { text: "ピンクローター", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "三角木馬", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "オホ声響く", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "一生懸命", type: 7, score: 2, isOni: false, genre: "normal" },
+            { text: "公衆面前", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "公衆トイレ", type: 7, score: 3, isOni: false, genre: "abnormal" },
+            { text: "亀甲縛り", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "チンカス香る", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "ぽこちんフィーバー", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "おしりを舐める", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "子宮恋愛", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "イク❤イク❤イっちゃう❤", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "くぎ打ち騎乗位", type: 7, score: 4, isOni: false, genre: "abnormal" },
+            { text: "除毛プレイで", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "拘束電マ", type: 7, score: 2, isOni: false, genre: "abnormal" },
+            { text: "高速ピストン", type: 7, score: 2, isOni: false, genre: "abnormal" },
 
 
             // <鬼札（高得点・インパクト）: 10点>
-            { text: "種付けプレス", type: 7, score: 10, isOni: true }, // ガチャ用語
-            { text: "射精懇願", type: 7, score: 10, isOni: true },
-            { text: "大量失禁", type: 7, score: 10, isOni: true },
-            { text: "ふたなり巨乳", type: 7, score: 15, isOni: true },
-            { text: "チン媚ダンス", type: 7, score: 10, isOni: true },
-            { text: "だいしゅきホールド", type: 7, score: 10, isOni: true },
-            { text: "縦割れあなる", type: 7, score: 10, isOni: true },
-            { text: "濁点喘ぎ", type: 7, score: 10, isOni: true },
-            { text: "快楽拷問", type: 7, score: 10, isOni: true },
-            { text: "アヘ顔ダブピ", type: 7, score: 10, isOni: true },
-            { text: "まさか・・・暴走!?", type: 7, score: 20, isOni: true },
+            { text: "種付けプレス", type: 7, score: 10, isOni: true, genre: "neta" }, // ガチャ用語
+            { text: "射精懇願", type: 7, score: 10, isOni: true, genre: "abnormal" },
+            { text: "大量失禁", type: 7, score: 10, isOni: true, genre: "abnormal" },
+            { text: "ふたなり巨乳", type: 7, score: 15, isOni: true, genre: "abnormal" },
+            { text: "チン媚ダンス", type: 7, score: 10, isOni: true, genre: "abnormal" },
+            { text: "だいしゅきホールド", type: 7, score: 10, isOni: true, genre: "neta" },
+            { text: "縦割れあなる", type: 7, score: 10, isOni: true, genre: "abnormal" },
+            { text: "濁点喘ぎ", type: 7, score: 10, isOni: true, genre: "abnormal" },
+            { text: "快楽拷問", type: 7, score: 10, isOni: true, genre: "abnormal" },
+            { text: "アヘ顔ダブピ", type: 7, score: 10, isOni: true, genre: "abnormal" },
+            { text: "まさか・・・暴走!?", type: 7, score: 20, isOni: true, genre: "neta" },
 
         ];
 
         // 配札ロジック (Util)
-        // 引数で枚数を指定可能にする (デフォルト: 5文字=5枚, 7文字=7枚)
-        function generateHand(count5 = 5, count7 = 7) {
+        // 引数で枚数とジャンル配分を指定可能
+        function generateHand(count5 = 5, count7 = 7, genreRatios = { normal: 0, abnormal: 10, neta: 0 }) {
+            const totalRatio = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
+            if (totalRatio === 0) {
+                // デフォルト: 全てabnormal
+                genreRatios = { normal: 0, abnormal: 10, neta: 0 };
+            }
+
+            // ジャンルに応じて一枚ずつ選ぶ
+            const pickOneByGenre = (arr) => {
+                const total = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
+                const rand = Math.random() * total;
+                let genre;
+                if (rand < genreRatios.normal) {
+                    genre = "normal";
+                } else if (rand < genreRatios.normal + genreRatios.abnormal) {
+                    genre = "abnormal";
+                } else {
+                    genre = "neta";
+                }
+
+                // 該当ジャンルのワードをフィルタ
+                const candidates = arr.filter(w => w.genre === genre);
+                if (candidates.length === 0) {
+                    // 該当ジャンルがない場合は全体から
+                    return arr[Math.floor(Math.random() * arr.length)];
+                }
+                return candidates[Math.floor(Math.random() * candidates.length)];
+            };
+
+            const pick = (arr, count) => {
+                const result = [];
+                const used = new Set();
+                for (let i = 0; i < count && i < arr.length; i++) {
+                    let word;
+                    let attempts = 0;
+                    do {
+                        word = pickOneByGenre(arr);
+                        attempts++;
+                    } while (used.has(word.text) && attempts < 100);
+
+                    if (!used.has(word.text)) {
+                        used.add(word.text);
+                        result.push({ ...word, id: Math.random().toString(36).substr(2, 9) });
+                    }
+                }
+                return result;
+            };
+
             const fives = WORD_DICTIONARY.filter(w => w.type === 5);
             const sevens = WORD_DICTIONARY.filter(w => w.type === 7);
 
-            const pick = (arr, count) => {
-                const shuffled = [...arr].sort(() => 0.5 - Math.random());
-                // IDを付与
-                return shuffled.slice(0, count).map(w => ({ ...w, id: Math.random().toString(36).substr(2, 9) }));
-            };
-
-            // 指定枚数配布
             return {
                 fives: pick(fives, count5),
                 sevens: pick(sevens, count7)
@@ -1577,7 +1647,10 @@
                         likePoints: 10,
                         everyonePlays: false,
                         handSizeFive: 5,
-                        handSizeSeven: 5
+                        handSizeSeven: 5,
+                        genreNormal: 0,
+                        genreAbnormal: 10,
+                        genreNeta: 0
                     },
                     tempSettings: { // 編集用
                         timeLimitMin: 5,
@@ -1586,7 +1659,10 @@
                         likePoints: 10,
                         everyonePlays: false,
                         handSizeFive: 5,
-                        handSizeSeven: 5
+                        handSizeSeven: 5,
+                        genreNormal: 0,
+                        genreAbnormal: 10,
+                        genreNeta: 0
                     },
                     roundStartTime: null,
                     timeLeft: 0,
@@ -1923,11 +1999,14 @@
                                 if (this.settings) {
                                     this.tempSettings.timeLimitMin = Math.floor(this.settings.timeLimit / 60);
                                     this.tempSettings.showMaster = this.settings.showMaster;
-                                    this.tempSettings.showMaster = this.settings.showMaster;
+                                    this.tempSettings.showScore = this.settings.showScore;
                                     this.tempSettings.likePoints = this.settings.likePoints;
                                     this.tempSettings.everyonePlays = this.settings.everyonePlays;
-                                    this.tempSettings.handSizeFive = this.settings.handSizeFive || 10;
+                                    this.tempSettings.handSizeFive = this.settings.handSizeFive || 5;
                                     this.tempSettings.handSizeSeven = this.settings.handSizeSeven || 5;
+                                    this.tempSettings.genreNormal = this.settings.genreNormal || 0;
+                                    this.tempSettings.genreAbnormal = this.settings.genreAbnormal || 10;
+                                    this.tempSettings.genreNeta = this.settings.genreNeta || 0;
                                 }
                             } else {
                                 this.viewState = 'GAME';
@@ -2350,7 +2429,10 @@
                         likePoints: this.tempSettings.likePoints,
                         everyonePlays: this.tempSettings.everyonePlays,
                         handSizeFive: this.tempSettings.handSizeFive,
-                        handSizeSeven: this.tempSettings.handSizeSeven
+                        handSizeSeven: this.tempSettings.handSizeSeven,
+                        genreNormal: this.tempSettings.genreNormal,
+                        genreAbnormal: this.tempSettings.genreAbnormal,
+                        genreNeta: this.tempSettings.genreNeta
                     };
                     await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
                 },
@@ -2368,12 +2450,18 @@
                         const nextMasterUid = this.players[randomIdx].uid;
 
                         // 設定に合わせて手札を配り直す
+                        const genreRatios = {
+                            normal: this.tempSettings.genreNormal || 0,
+                            abnormal: this.tempSettings.genreAbnormal || 10,
+                            neta: this.tempSettings.genreNeta || 0
+                        };
                         const refreshedPlayers = this.players.map(p => {
                             return {
                                 ...p,
                                 hand: generateHand(
                                     this.tempSettings.handSizeFive,
-                                    this.tempSettings.handSizeSeven
+                                    this.tempSettings.handSizeSeven,
+                                    genreRatios
                                 )
                             };
                         });
@@ -2459,8 +2547,13 @@
 
                         const nextMasterUid = this.players[nextMasterIdx].uid;
 
+                        const genreRatios = {
+                            normal: this.settings.genreNormal || 0,
+                            abnormal: this.settings.genreAbnormal || 10,
+                            neta: this.settings.genreNeta || 0
+                        };
                         const refreshedPlayers = this.players.map(p => {
-                            return { ...p, hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven) };
+                            return { ...p, hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven, genreRatios) };
                         });
 
                         const newHistory = [...this.masterHistory];
@@ -2479,12 +2572,17 @@
 
                 async startNextGame() {
                     // 次のゲームの設定のためロビーに戻る
+                    const genreRatios = {
+                        normal: this.settings.genreNormal || 0,
+                        abnormal: this.settings.genreAbnormal || 10,
+                        neta: this.settings.genreNeta || 0
+                    };
                     const resetPlayers = this.players.map(p => ({
                         ...p,
                         score: 0,
                         totalLikes: 0,
                         // winCountは維持される(pに含まれるため)
-                        hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven)
+                        hand: generateHand(this.settings.handSizeFive, this.settings.handSizeSeven, genreRatios)
                     }));
                     const firstMaster = resetPlayers[0].uid;
 
