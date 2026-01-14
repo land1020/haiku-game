@@ -791,6 +791,17 @@
 
                 <!-- 親の画面 (通常モード) -->
                 <div v-if="isMeMaster && !settings.everyonePlays" class="card-box" style="text-align:center;">
+                    <!-- 親用タイマー表示 -->
+                    <div v-if="gamePhase === 'WRITING'"
+                        style="margin-bottom:10px; padding:8px; background:#fff3e0; border-radius:4px; border:1px solid #ffcc80;">
+                        <span v-if="timeLeft > 0"
+                            style="font-size:1.1rem; font-weight:bold; color:var(--accent-color);">
+                            ⏳ 残り {{ Math.floor(timeLeft / 60) }}:{{ ('0' + (timeLeft % 60)).slice(-2) }}
+                        </span>
+                        <span v-else style="font-size:1.1rem; font-weight:bold; color:red;">
+                            ⏰ 時間終了！
+                        </span>
+                    </div>
                     <button class="btn btn-primary" @click="forceAllSubmit"
                         :disabled="submittedCount >= players.length - 1">
                         未提出者を強制提出させて次へ
@@ -2122,8 +2133,8 @@
                         this.speakHaiku(next);
                     }
 
-                    // 7秒後に次へ（読み上げ時間を考慮）
-                    const duration = this.settings.speechEnabled ? 8000 : 5000;
+                    // 演出時間（読み上げ時間を考慮）
+                    const duration = this.settings.speechEnabled ? 6000 : 5000;
                     setTimeout(() => {
                         this.showSpecialEffectOverlay = false; // 一旦消す（フェードアウト用）
 
@@ -2168,8 +2179,8 @@
 
                     // 上五→中七→下五 の順に読む
                     speakPart(top, 500);      // 0.5秒後に上五
-                    speakPart(middle, 2500);  // 2.5秒後に中七
-                    speakPart(bottom, 5000);  // 5秒後に下五
+                    speakPart(middle, 2000);  // 2.0秒後に中七
+                    speakPart(bottom, 4000);  // 4.0秒後に下五
                 },
 
                 // --- UI表示用クラス ---
