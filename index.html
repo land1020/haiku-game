@@ -2538,14 +2538,14 @@
                             utterance.onend = () => {
                                 index++;
                                 // 次のパートまで少し間を空ける
-                                setTimeout(speakNext, 300);
+                                setTimeout(speakNext, 100);
                             };
                             window.speechSynthesis.speak(utterance);
-                        }, 200); // 表示から200ms後に読み上げ開始
+                        }, 100); // 表示から100ms後に読み上げ開始
                     };
 
                     // 最初のパートを少し遅らせてから開始
-                    setTimeout(speakNext, 300);
+                    setTimeout(speakNext, 100);
                 },
 
                 // 読み上げ無効時の順次表示
@@ -2553,7 +2553,7 @@
                     this.visiblePhraseIndex = -1;
                     setTimeout(() => { this.visiblePhraseIndex = 0; }, 300);
                     setTimeout(() => { this.visiblePhraseIndex = 1; }, 1300);
-                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 2300);
+                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 1300);
                     // 最後の表示から1.5秒後にコールバック
                     if (onComplete) {
                         setTimeout(onComplete, 3800);
