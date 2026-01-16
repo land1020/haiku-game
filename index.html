@@ -2466,18 +2466,9 @@
                     this.showSpecialEffectOverlay = true;
                     this.visiblePhraseIndex = -1; // 表示リセット
 
-                    // 音声読み上げが有効な場合
-                    if (this.settings.speechEnabled) {
-                        this.speakHaiku(next);
-                    } else {
-                        // 読み上げ無効時は順次表示のみ
-                        this.showPhrasesSequentially();
-                    }
-
-                    // 演出時間（読み上げ時間を考慮）
-                    const duration = this.settings.speechEnabled ? 6000 : 5000;
-                    setTimeout(() => {
-                        this.showSpecialEffectOverlay = false; // 一旦消す（フェードアウト用）
+                    // 演出終了処理
+                    const endEffect = () => {
+                        this.showSpecialEffectOverlay = false;
                         this.visiblePhraseIndex = -1;
 
                         // 少し間隔を空けて次
@@ -2488,15 +2479,23 @@
                         } else {
                             this.specialEffectHaiku = null;
                         }
-                    }, duration);
+                    };
+
+                    // 音声読み上げが有効な場合
+                    if (this.settings.speechEnabled) {
+                        this.speakHaiku(next, endEffect);
+                    } else {
+                        // 読み上げ無効時は順次表示のみ
+                        this.showPhrasesSequentially(endEffect);
+                    }
                 },
 
                 // --- 俳句読み上げ ---
-                speakHaiku(haiku) {
+                speakHaiku(haiku, onComplete) {
                     if (!window.speechSynthesis) {
                         console.warn('Speech Synthesis not supported');
                         // 読み上げ無効でも表示は順次行う
-                        this.showPhrasesSequentially();
+                        this.showPhrasesSequentially(onComplete);
                         return;
                     }
 
@@ -2519,33 +2518,46 @@
                     const self = this;
 
                     const speakNext = () => {
-                        if (index >= parts.length) return;
+                        if (index >= parts.length) {
+                            // 全パート読み上げ完了、1秒後にコールバック
+                            if (onComplete) {
+                                setTimeout(onComplete, 1000);
+                            }
+                            return;
+                        }
 
-                        // 表示を更新（読み上げ開始と同時に表示）
+                        // 表示を先行（読み上げ開始の少し前に表示）
                         self.visiblePhraseIndex = index;
 
-                        const utterance = new SpeechSynthesisUtterance(parts[index]);
-                        utterance.lang = 'ja-JP';
-                        utterance.rate = 0.85; // 少しゆっくり
-                        utterance.pitch = 1.0;
-                        utterance.onend = () => {
-                            index++;
-                            // 次のパートまで少し間を空ける
-                            setTimeout(speakNext, 300);
-                        };
-                        window.speechSynthesis.speak(utterance);
+                        // 少し遅らせてから読み上げ開始
+                        setTimeout(() => {
+                            const utterance = new SpeechSynthesisUtterance(parts[index]);
+                            utterance.lang = 'ja-JP';
+                            utterance.rate = 0.85; // 少しゆっくり
+                            utterance.pitch = 1.0;
+                            utterance.onend = () => {
+                                index++;
+                                // 次のパートまで少し間を空ける
+                                setTimeout(speakNext, 300);
+                            };
+                            window.speechSynthesis.speak(utterance);
+                        }, 200); // 表示から200ms後に読み上げ開始
                     };
 
                     // 最初のパートを少し遅らせてから開始
-                    setTimeout(speakNext, 500);
+                    setTimeout(speakNext, 300);
                 },
 
                 // 読み上げ無効時の順次表示
-                showPhrasesSequentially() {
+                showPhrasesSequentially(onComplete) {
                     this.visiblePhraseIndex = -1;
-                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 500);
-                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 1500);
-                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 2500);
+                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 300);
+                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 1300);
+                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 2300);
+                    // 最後の表示から1.5秒後にコールバック
+                    if (onComplete) {
+                        setTimeout(onComplete, 3800);
+                    }
                 },
 
                 // --- UI表示用クラス ---
