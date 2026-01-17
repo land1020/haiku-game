@@ -1163,6 +1163,10 @@
 
             <div style="margin-bottom:20px; display:flex; justify-content:center; gap:10px;">
                 <button class="btn" @click="closeHallOfFame">戻る</button>
+                <button class="btn" style="background:#d9534f; font-size:0.8rem;" @click="deleteSelectedHallOfFame"
+                    v-if="selectedHallOfFameIds.length > 0">
+                    🗑️ 選択した項目を削除 ({{ selectedHallOfFameIds.length }})
+                </button>
                 <button class="btn" style="background:#888; font-size:0.8rem;" @click="resetHallOfFame"
                     v-if="hallOfFameList.length > 0">
                     🗑️ 全て削除
@@ -1177,8 +1181,12 @@
                 style="margin-bottom:20px; border:1px solid #ddd; text-align:left;">
 
                 <div
-                    style="background:#f0f0f0; padding:5px 10px; border-bottom:1px solid #ccc; font-size:0.9rem; display:flex; justify-content:space-between;">
-                    <strong>{{ formatDate(record.createdAt) }}</strong>
+                    style="background:#f0f0f0; padding:5px 10px; border-bottom:1px solid #ccc; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" :value="record.id" v-model="selectedHallOfFameIds"
+                            style="transform:scale(1.5);">
+                        <strong>{{ formatDate(record.createdAt) }}</strong>
+                    </div>
                     <span>ルーム: {{ record.roomId }}</span>
                 </div>
 
@@ -2231,6 +2239,7 @@
 
                 // ロビー機能
                 hallOfFameList: [],
+                selectedHallOfFameIds: [],
 
                 // ロビー機能 --- 
                 async enterRoom() {
@@ -3414,6 +3423,7 @@
 
                 async openHallOfFame() {
                     this.isLoading = true;
+                    this.selectedHallOfFameIds = [];
                     try {
                         const q = window.query || ((ref, opts) => ref); // query関数がimportされていない場合の対策が必要だが、今回はCDNから全部取ってるはず。
                         // firebase-firestore.jsのimportにquery, orderBy, limitを追加する必要があるかも。
@@ -3439,6 +3449,40 @@
                 closeHallOfFame() {
                     this.viewState = 'LOBBY';
                     this.hallOfFameList = [];
+                    this.selectedHallOfFameIds = [];
+                },
+
+                async deleteSelectedHallOfFame() {
+                    if (this.selectedHallOfFameIds.length === 0) return;
+
+                    const password = prompt("選択したデータを削除するためのパスワードを入力してください");
+                    if (password !== "1111") {
+                        alert("パスワードが違います");
+                        return;
+                    }
+
+                    if (!confirm(`選択した ${this.selectedHallOfFameIds.length} 件のデータを削除しますか？`)) return;
+
+                    this.isLoading = true;
+                    try {
+                        const batch = writeBatch(db);
+                        this.selectedHallOfFameIds.forEach(id => {
+                            const ref = doc(db, "hallOfFame", id);
+                            batch.delete(ref);
+                        });
+                        await batch.commit();
+
+                        // リストから除外
+                        this.hallOfFameList = this.hallOfFameList.filter(r => !this.selectedHallOfFameIds.includes(r.id));
+                        this.selectedHallOfFameIds = [];
+
+                        alert("削除しました");
+                    } catch (e) {
+                        console.error(e);
+                        alert("削除失敗: " + e.message);
+                    } finally {
+                        this.isLoading = false;
+                    }
                 },
 
                 async resetHallOfFame() {
@@ -3460,6 +3504,7 @@
                         await batch.commit();
 
                         this.hallOfFameList = [];
+                        this.selectedHallOfFameIds = [];
                         alert("殿堂入りデータをリセットしました");
                     } catch (e) {
                         console.error(e);
