@@ -1494,7 +1494,6 @@
             { text: "生で出す", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "ゴム無しで", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "精飲を", type: 5, score: 6, isOni: false, genre: "abnormal" },
-            { text: "イラマチオ", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "クリトリス", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "膣の中", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "ガチイキで", type: 5, score: 5, isOni: false, genre: "abnormal" },
@@ -2333,6 +2332,11 @@
                         if (!docSnap.exists()) return;
                         const data = docSnap.data();
 
+                        // 変更前の値を保持（変更検知用）
+                        const oldRoundCount = this.roundCount;
+                        const oldGameCount = this.gameCount;
+                        const oldPhase = this.gamePhase;
+
                         this.players = data.players || [];
                         this.roundCount = data.roundCount;
                         this.masterUid = data.masterUid;
@@ -2342,7 +2346,8 @@
                         this.roundStartTime = data.roundStartTime || null;
 
                         console.log('Room update:', data); // DEBUG
-                        console.log('Current Phase:', this.gamePhase, 'New Status:', data.status); // DEBUG
+                        console.log('Current Phase:', oldPhase, 'New Status:', data.status); // DEBUG
+                        console.log('RoundCount change:', oldRoundCount, '->', this.roundCount); // DEBUG
 
                         // 設定同期
                         if (data.settings) {
@@ -2369,9 +2374,15 @@
                             }
                         }
 
-                        // ステータス変化検知
-                        if (this.gamePhase !== data.status) {
-                            const oldPhase = this.gamePhase;
+                        // ラウンドまたはゲームカウントが変わったら俳句リストを再フィルタ
+                        if (oldRoundCount !== this.roundCount || oldGameCount !== this.gameCount) {
+                            console.log('Round/Game changed, re-filtering haikus'); // DEBUG
+                            this.refreshCurrentHaikus();
+                        }
+
+                        // ステータス変化検知（フェーズが変わった場合、または初回同期時）
+                        const phaseChanged = oldPhase !== data.status;
+                        if (phaseChanged) {
                             this.gamePhase = data.status;
 
                             if (this.gamePhase === 'FINISHED') {
@@ -2403,6 +2414,8 @@
                                 this.isSpecialEffectDone = false; // フラグ初期化
                                 // タイマー開始
                                 this.startTimer();
+                                // 俳句リストも再フィルタ（新しいラウンドの俳句がないはず）
+                                this.refreshCurrentHaikus();
                             } else if (this.gamePhase === 'JUDGING') {
                                 this.stopTimer();
                                 // 演出判定
@@ -2423,6 +2436,18 @@
                             // フェーズが変わらなくても時刻同期などでタイマー調整が必要かも
                             if (this.gamePhase === 'WRITING') {
                                 this.startTimer();
+                            }
+
+                            // viewStateがLOBBYのままの場合は正しい状態に更新
+                            if (this.viewState === 'LOBBY' && data.status) {
+                                if (data.status === 'FINISHED') {
+                                    this.viewState = 'FINISHED';
+                                } else if (data.status === 'WAITING') {
+                                    this.viewState = 'WAITING';
+                                } else {
+                                    this.viewState = 'GAME';
+                                }
+                                this.gamePhase = data.status;
                             }
                         }
                     }, (error) => {
@@ -2457,6 +2482,15 @@
                     }, (error) => {
                         console.error('Haikus listener error:', error);
                     });
+                },
+
+                // 俳句リストを現在のラウンド/ゲーム用に再フィルタ
+                refreshCurrentHaikus() {
+                    this.currentHaikus = this.allGameHaikus.filter(h =>
+                        h.gameCount === this.gameCount &&
+                        h.round === this.roundCount
+                    );
+                    console.log('Refreshed currentHaikus:', this.currentHaikus.length, 'for round', this.roundCount); // DEBUG
                 },
 
                 processSpecialEffects() {
@@ -2533,9 +2567,22 @@
                     // 順番に読み上げる（前のパートが終わったら次を読む）
                     let index = 0;
                     const self = this;
+                    let fallbackTimeout = null;
+                    let hasProceeded = false; // 二重実行防止フラグ
 
                     const speakNext = () => {
+                        // 二重実行防止
+                        if (hasProceeded && index >= parts.length) {
+                            return;
+                        }
+
                         if (index >= parts.length) {
+                            hasProceeded = true;
+                            // フォールバックタイマーをクリア
+                            if (fallbackTimeout) {
+                                clearTimeout(fallbackTimeout);
+                                fallbackTimeout = null;
+                            }
                             // 全パート読み上げ完了、1秒後にコールバック
                             if (onComplete) {
                                 setTimeout(onComplete, 1000);
@@ -2546,16 +2593,60 @@
                         // 読み上げと表示を同時に開始
                         self.visiblePhraseIndex = index;
 
-                        const utterance = new SpeechSynthesisUtterance(parts[index]);
-                        utterance.lang = 'ja-JP';
-                        utterance.rate = 0.85; // 少しゆっくり
-                        utterance.pitch = 1.0;
-                        utterance.onend = () => {
+                        const currentIndex = index; // クロージャでインデックスを保持
+                        let utteranceEnded = false;
+
+                        const proceedToNext = () => {
+                            // すでに次に進んでいる場合はスキップ
+                            if (utteranceEnded) return;
+                            utteranceEnded = true;
+
+                            // フォールバックタイマーをクリア
+                            if (fallbackTimeout) {
+                                clearTimeout(fallbackTimeout);
+                                fallbackTimeout = null;
+                            }
+
                             index++;
                             // 次のパートまで少し間を空ける
                             setTimeout(speakNext, 100);
                         };
+
+                        const utterance = new SpeechSynthesisUtterance(parts[currentIndex]);
+                        utterance.lang = 'ja-JP';
+                        utterance.rate = 0.85; // 少しゆっくり
+                        utterance.pitch = 1.0;
+
+                        // onendイベントで次へ進む（正常系）
+                        utterance.onend = () => {
+                            proceedToNext();
+                        };
+
+                        // onerrorイベントも処理
+                        utterance.onerror = (e) => {
+                            console.warn('Speech synthesis error:', e);
+                            proceedToNext();
+                        };
+
+                        // iOS対策: onendが発火しない場合のフォールバック
+                        // テキストの長さに基づいてタイムアウトを設定（1文字あたり約200ms + バッファ）
+                        const estimatedDuration = Math.max(2000, parts[currentIndex].length * 300 + 1000);
+                        fallbackTimeout = setTimeout(() => {
+                            if (!utteranceEnded) {
+                                console.warn('Speech synthesis onend did not fire, using fallback');
+                                // iOSで止まっている場合はキャンセルして次へ
+                                window.speechSynthesis.cancel();
+                                proceedToNext();
+                            }
+                        }, estimatedDuration);
+
                         window.speechSynthesis.speak(utterance);
+
+                        // iOS Safari用ワークアラウンド: 
+                        // speechSynthesisが停止している場合に再開を試みる
+                        if (window.speechSynthesis.paused) {
+                            window.speechSynthesis.resume();
+                        }
                     };
 
                     // 最初のパートを少し遅らせてから開始
@@ -2565,9 +2656,9 @@
                 // 読み上げ無効時の順次表示
                 showPhrasesSequentially(onComplete) {
                     this.visiblePhraseIndex = -1;
-                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 300);
-                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 1300);
-                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 1300);
+                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 300);   // 上五
+                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 1300);  // 中七
+                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 2300);  // 下五
                     // 最後の表示から1.5秒後にコールバック
                     if (onComplete) {
                         setTimeout(onComplete, 3800);
