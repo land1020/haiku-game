@@ -3468,8 +3468,16 @@
 
                 // --- 殿堂入りヘルパー ---
                 toggleHallOfFameDetail(id) {
-                    if (this.expandedRecordId === id) this.expandedRecordId = null;
-                    else this.expandedRecordId = id;
+                    if (this.expandedRecordId === id) {
+                        this.expandedRecordId = null;
+                    } else {
+                        const password = prompt("詳細を見るためのパスワードを入力してください");
+                        if (password === "1111") {
+                            this.expandedRecordId = id;
+                        } else {
+                            alert("パスワードが違います");
+                        }
+                    }
                 },
 
                 getPlayerNameFromRecord(record, uid) {
