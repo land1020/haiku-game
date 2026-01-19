@@ -1214,10 +1214,7 @@
                         <div v-for="p in record.players" :key="p.uid"
                             style="font-size:0.9rem; border-bottom:1px dotted #ccc; padding:2px 0;">
                             <span>{{ p.name }} ({{ p.score }}pt)</span>
-                            <span v-if="p.favoriteHaikuId"
-                                style="display:block; font-size:0.8rem; color:var(--fav-color); margin-left:10px;">
-                                ↳ ★ {{ getHaikuTextFromRecord(record, p.favoriteHaikuId) }}
-                            </span>
+
                         </div>
                     </div>
 
