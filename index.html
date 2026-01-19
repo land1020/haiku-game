@@ -387,15 +387,15 @@
         }
 
         .phrase.top {
-            animation-delay: 0.5s;
+            animation-delay: 0s;
         }
 
         .phrase.middle {
-            animation-delay: 1.5s;
+            animation-delay: 0s;
         }
 
         .phrase.bottom {
-            animation-delay: 2.5s;
+            animation-delay: 0s;
         }
 
         .special-footer {
@@ -1807,7 +1807,7 @@
             { text: "せやかて工藤", type: 7, score: 5, isOni: false, genre: "neta" },
             { text: "領域展開", type: 7, score: 5, isOni: false, genre: "neta" },
             { text: "汚物は消毒", type: 7, score: 6, isOni: false, genre: "neta" },
-            { text: "ぽこちんフィーバー", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "ぽこちんフィーバー", type: 7, score: 2, isOni: false, genre: "neta" },
             { text: "ぽこちん蹴り上げ", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "スーパーチャット", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "ウホッいい男", type: 7, score: 6, isOni: false, genre: "neta" },
@@ -1831,10 +1831,10 @@
 
 
             // 鬼札
-            { text: "まさか・・・暴走!?", type: 7, score: 20, isOni: true, genre: "neta" },
-            { text: "童貞を殺す", type: 7, score: 20, isOni: true, genre: "neta" },
-            { text: "安西先生", type: 7, score: 20, isOni: true, genre: "neta" },
-            { text: "男同士で", type: 7, score: 20, isOni: true, genre: "neta" },
+            { text: "まさか・・・暴走!?", type: 7, score: 10, isOni: true, genre: "neta" },
+            { text: "童貞を殺す", type: 7, score: 10, isOni: true, genre: "neta" },
+            { text: "安西先生", type: 7, score: 10, isOni: true, genre: "neta" },
+            { text: "男同士で", type: 7, score: 10, isOni: true, genre: "neta" },
 
         ];
 
@@ -2609,7 +2609,7 @@
 
                         const utterance = new SpeechSynthesisUtterance(parts[currentIndex]);
                         utterance.lang = 'ja-JP';
-                        utterance.rate = 0.85; // 少しゆっくり
+                        utterance.rate = 1.1; // 少し速く
                         utterance.pitch = 1.0;
 
                         // onendイベントで次へ進む（正常系）
@@ -2651,12 +2651,12 @@
                 // 読み上げ無効時の順次表示
                 showPhrasesSequentially(onComplete) {
                     this.visiblePhraseIndex = -1;
-                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 300);   // 上五
-                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 1300);  // 中七
-                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 2300);  // 下五
+                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 100);   // 上五
+                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 800);  // 中七
+                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 1500);  // 下五
                     // 最後の表示から1.5秒後にコールバック
                     if (onComplete) {
-                        setTimeout(onComplete, 3800);
+                        setTimeout(onComplete, 2500);
                     }
                 },
 
