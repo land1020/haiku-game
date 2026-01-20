@@ -2610,13 +2610,13 @@
                             }
 
                             index++;
-                            // 次のパートまで少し間を空ける
-                            setTimeout(speakNext, 100);
+                            // 次のパートまでの間を最小限に
+                            setTimeout(speakNext, 50);
                         };
 
                         const utterance = new SpeechSynthesisUtterance(parts[currentIndex]);
                         utterance.lang = 'ja-JP';
-                        utterance.rate = 1.1; // 少し速く
+                        utterance.rate = 1.4; // 速めに読み上げ
                         utterance.pitch = 1.0;
 
                         // onendイベントで次へ進む（正常系）
@@ -2632,7 +2632,7 @@
 
                         // iOS対策: onendが発火しない場合のフォールバック
                         // テキストの長さに基づいてタイムアウトを設定（1文字あたり約200ms + バッファ）
-                        const estimatedDuration = Math.max(2000, parts[currentIndex].length * 300 + 1000);
+                        const estimatedDuration = Math.max(1500, parts[currentIndex].length * 200 + 500);
                         fallbackTimeout = setTimeout(() => {
                             if (!utteranceEnded) {
                                 console.warn('Speech synthesis onend did not fire, using fallback');
@@ -2651,19 +2651,19 @@
                         }
                     };
 
-                    // 最初のパートを少し遅らせてから開始
-                    setTimeout(speakNext, 300);
+                    // 最初のパートをすぐに開始
+                    setTimeout(speakNext, 100);
                 },
 
                 // 読み上げ無効時の順次表示
                 showPhrasesSequentially(onComplete) {
                     this.visiblePhraseIndex = -1;
-                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 100);   // 上五
-                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 800);  // 中七
-                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 1500);  // 下五
-                    // 最後の表示から1.5秒後にコールバック
+                    setTimeout(() => { this.visiblePhraseIndex = 0; }, 50);   // 上五
+                    setTimeout(() => { this.visiblePhraseIndex = 1; }, 500);  // 中七
+                    setTimeout(() => { this.visiblePhraseIndex = 2; }, 950);  // 下五
+                    // 最後の表示から1秒後にコールバック
                     if (onComplete) {
-                        setTimeout(onComplete, 2500);
+                        setTimeout(onComplete, 1950);
                     }
                 },
 
