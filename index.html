@@ -1187,11 +1187,11 @@
                             style="transform:scale(1.5);">
                         <strong>{{ formatDate(record.createdAt) }}</strong>
                     </div>
-                    <span>ルーム: {{ record.roomId }}</span>
+
                 </div>
 
                 <!-- 概要（クリックで展開） -->
-                <div style="padding:10px; cursor:pointer;" @click="toggleHallOfFameDetail(record.id)">
+                <div style="padding:10px; cursor:pointer;" @click="toggleHallOfFameDetail(record)">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span>
                             <strong>👑 優勝:</strong>
@@ -1457,7 +1457,7 @@
             { text: "肉便器", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "寝取られて", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "乳首責め", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "百合えっち", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "百合えっち", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "ショタちんこ", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "初体験", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "筆おろし", type: 5, score: 5, isOni: false, genre: "abnormal" },
@@ -1488,7 +1488,7 @@
             { text: "潮吹きを", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "愛人と", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "パパ活で", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "生で出す", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "生で出す", type: 5, score: 4, isOni: false, genre: "abnormal" },
             { text: "ゴム無しで", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "精飲を", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "クリトリス", type: 5, score: 5, isOni: false, genre: "abnormal" },
@@ -1497,7 +1497,7 @@
             { text: "即尺で", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "指マンで", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "浣腸し", type: 5, score: 6, isOni: false, genre: "abnormal" },
-            { text: "Gスポット", type: 5, score: 6, isOni: false, genre: "abnormal" },
+            { text: "Gスポット", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "触手責め", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "雌豚と", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "寝取らせて", type: 5, score: 6, isOni: false, genre: "abnormal" },
@@ -1505,7 +1505,7 @@
             { text: "拘束具", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "言葉責め", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "誘い受け", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "スケベ椅子", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "スケベ椅子", type: 5, score: 4, isOni: false, genre: "abnormal" },
             { text: "隠し撮り", type: 5, score: 4, isOni: false, genre: "abnormal" },
             { text: "まんこくぱぁ", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "露出狂", type: 5, score: 5, isOni: false, genre: "abnormal" },
@@ -1518,7 +1518,7 @@
             { text: "足コキで", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "パイズリで", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "大陰茎", type: 5, score: 6, isOni: false, genre: "abnormal" },
-            { text: "3Pで", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "3Pで", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "乱交だ", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "クリを責め", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "潮吹いた", type: 5, score: 6, isOni: false, genre: "abnormal" },
@@ -1526,7 +1526,7 @@
             { text: "ザーメンを", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "マン汁を", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "我慢汁", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "名器だな", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "名器だな", type: 5, score: 4, isOni: false, genre: "abnormal" },
             { text: "締まり良し", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "ガバガバだ", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "パイパンの", type: 5, score: 5, isOni: false, genre: "abnormal" },
@@ -1537,23 +1537,23 @@
             { text: "顔騎して", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "駅弁で", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "四つん這い", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "尻を振れ", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "尻を振れ", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "尻穴が", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "お尻好き", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "尻叩き", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "スパンキング", type: 7, score: 5, isOni: false, genre: "abnormal" },
+            { text: "尻叩き", type: 5, score: 3, isOni: false, genre: "abnormal" },
+            { text: "乳首責め", type: 7, score: 5, isOni: false, genre: "abnormal" },
             { text: "締まるケツ", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "アナニーで", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "イかせてやる", type: 5, score: 6, isOni: false, genre: "abnormal" },
-            { text: "抜いてあげる", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "踏んであげる", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "ほらイクぞ", type: 5, score: 6, isOni: false, genre: "abnormal" },
+            { text: "放屁して", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "まんぴーが", type: 5, score: 4, isOni: false, genre: "abnormal" },
             { text: "跪け", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "豚野郎", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "男同士", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "男の娘", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "男の娘", type: 5, score: 6, isOni: false, genre: "abnormal" },
             { text: "女装して", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "メスになり", type: 5, score: 5, isOni: false, genre: "abnormal" },
-            { text: "ケツ貸しな", type: 5, score: 5, isOni: false, genre: "abnormal" },
+            { text: "ザコちんぽ", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "孕ませて", type: 5, score: 6, isOni: false, genre: "abnormal" },
             // 鬼札
             { text: "バブみある", type: 5, score: 10, isOni: true, genre: "abnormal" },
@@ -1581,11 +1581,11 @@
             { text: "うわキッツ", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "うわデッカ", type: 5, score: 6, isOni: false, genre: "neta" },
             { text: "Oh.YES", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "や・ら・な・い・か", type: 5, score: 8, isOni: false, genre: "neta" },
+            { text: "や・ら・な・い・か", type: 4, score: 8, isOni: false, genre: "neta" },
             { text: "VTuber", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "神回避", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "倍返し", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "草生える", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "草生える", type: 5, score: 4, isOni: false, genre: "neta" },
             { text: "待って無理", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "尊すぎ", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "知らんけど", type: 5, score: 5, isOni: false, genre: "neta" },
@@ -1596,13 +1596,13 @@
             { text: "逃げちゃだめ", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "海賊王", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "うｐ乙です", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "ピッピカチュウ", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "ピッピカチュウ", type: 5, score: 7, isOni: false, genre: "neta" },
             { text: "うっせぇわ", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "異世界へ", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "異世界へ", type: 5, score: 3, isOni: false, genre: "neta" },
             { text: "大草原", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "逝ってよし", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "逝ってよし", type: 5, score: 4, isOni: false, genre: "neta" },
             { text: "ホンマそれ", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "ザ・ワールド", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "ザ・ワールド", type: 5, score: 6, isOni: false, genre: "neta" },
             { text: "三連戦", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "ご立派ぁ", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "ゲットだぜ", type: 5, score: 5, isOni: false, genre: "neta" },
@@ -1611,6 +1611,12 @@
             { text: "メイのバカ", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "デスノート", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "黙れ小僧！", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "超快感", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "自害しろ", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
 
             // 鬼札
             { text: "黒歴史", type: 5, score: 10, isOni: true, genre: "neta" },
@@ -1825,6 +1831,10 @@
             { text: "覚悟はいいか", type: 7, score: 5, isOni: false, genre: "neta" },
             { text: "粉砕玉砕", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "真っ黒くろすけ", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "入れ替わってる！？", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "あぁ、間違いない", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "こいつはくせえッー", type: 7, score: 6, isOni: false, genre: "neta" },
+
 
 
             // 鬼札
@@ -3467,13 +3477,13 @@
                 },
 
                 // --- 殿堂入りヘルパー ---
-                toggleHallOfFameDetail(id) {
-                    if (this.expandedRecordId === id) {
+                toggleHallOfFameDetail(record) {
+                    if (this.expandedRecordId === record.id) {
                         this.expandedRecordId = null;
                     } else {
                         const password = prompt("詳細を見るためのパスワードを入力してください");
-                        if (password === "1111") {
-                            this.expandedRecordId = id;
+                        if (password === record.roomId) {
+                            this.expandedRecordId = record.id;
                         } else {
                             alert("パスワードが違います");
                         }
