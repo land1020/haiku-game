@@ -1541,7 +1541,6 @@
             { text: "尻穴が", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "お尻好き", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "尻叩き", type: 5, score: 3, isOni: false, genre: "abnormal" },
-            { text: "乳首責め", type: 7, score: 5, isOni: false, genre: "abnormal" },
             { text: "締まるケツ", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "アナニーで", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "ほらイクぞ", type: 5, score: 6, isOni: false, genre: "abnormal" },
@@ -1613,10 +1612,7 @@
             { text: "黙れ小僧！", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "超快感", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "自害しろ", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
-            { text: "", type: 5, score: 5, isOni: false, genre: "neta" },
+
 
             // 鬼札
             { text: "黒歴史", type: 5, score: 10, isOni: true, genre: "neta" },
@@ -2027,12 +2023,12 @@
                         showScore: true,
                         likePoints: 10,
                         everyonePlays: false,
-                        handSizeFive: 5,
+                        handSizeFive: 8,
                         handSizeSeven: 5,
                         genreNormal: 0,
                         genreAbnormal: 10,
                         genreNeta: 0,
-                        speechEnabled: false // 俳句演出読み上げ
+                        speechEnabled: true // 俳句演出読み上げ
                     },
                     tempSettings: { // 編集用
                         timeLimitMin: 5,
@@ -2040,12 +2036,12 @@
                         showScore: true,
                         likePoints: 10,
                         everyonePlays: false,
-                        handSizeFive: 5,
+                        handSizeFive: 8,
                         handSizeSeven: 5,
                         genreNormal: 0,
                         genreAbnormal: 10,
                         genreNeta: 0,
-                        speechEnabled: false // 俳句演出読み上げ
+                        speechEnabled: true // 俳句演出読み上げ
                     },
                     roundStartTime: null,
                     timeLeft: 0,
@@ -2282,8 +2278,9 @@
                                     showScore: true,
                                     likePoints: 10,
                                     everyonePlays: false,
-                                    handSizeFive: 5, // 5文字カード枚数
-                                    handSizeSeven: 5  // 7文字カード枚数
+                                    handSizeFive: 8, // 5文字カード枚数
+                                    handSizeSeven: 5, // 7文字カード枚数
+                                    speechEnabled: true // 読み上げデフォルトON
                                 },
                                 roundStartTime: null
                             });
@@ -2359,6 +2356,8 @@
                                 showScore: true,
                                 likePoints: 10,
                                 everyonePlays: false,
+                                handSizeFive: 8,
+                                speechEnabled: true,
                                 ...data.settings
                             };
                             // 編集用変数にも反映（自分がホストで編集中でない場合...は難しいので、とりあえず同期）
@@ -2398,12 +2397,12 @@
                                     this.tempSettings.showScore = this.settings.showScore;
                                     this.tempSettings.likePoints = this.settings.likePoints;
                                     this.tempSettings.everyonePlays = this.settings.everyonePlays;
-                                    this.tempSettings.handSizeFive = this.settings.handSizeFive || 5;
+                                    this.tempSettings.handSizeFive = this.settings.handSizeFive || 8;
                                     this.tempSettings.handSizeSeven = this.settings.handSizeSeven || 5;
                                     this.tempSettings.genreNormal = this.settings.genreNormal || 0;
                                     this.tempSettings.genreAbnormal = this.settings.genreAbnormal || 10;
                                     this.tempSettings.genreNeta = this.settings.genreNeta || 0;
-                                    this.tempSettings.speechEnabled = this.settings.speechEnabled || false;
+                                    this.tempSettings.speechEnabled = (this.settings.speechEnabled !== undefined) ? this.settings.speechEnabled : true;
                                 }
                             } else {
                                 this.viewState = 'GAME';
