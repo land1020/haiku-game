@@ -720,6 +720,22 @@
                         {{ settings.speechEnabled ? '🔊 読み上げON' : '🔇 読み上げOFF' }}
                     </div>
                 </div>
+
+                <!-- 自由記入枚数設定 -->
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-weight:bold;">🖊️ 自由記入カード枚数</label>
+                    <div v-if="isMeMaster">
+                        <input type="range" v-model.number="tempSettings.freeCardLimit" min="1" max="3" step="1"
+                            style="width:100%;" @change="saveSettings">
+                        <div style="text-align:right;">{{ tempSettings.freeCardLimit || 1 }} 枚</div>
+                    </div>
+                    <div v-else>
+                        {{ settings.freeCardLimit || 1 }} 枚
+                    </div>
+                    <p style="font-size:0.75rem; color:#666; margin-top:3px;">
+                        1ラウンドで作成できる自由記入カードの枚数
+                    </p>
+                </div>
             </div>
 
             <div v-if="isMeMaster" style="text-align:center;">
@@ -845,12 +861,14 @@
                     </div>
 
                     <div v-if="!hasSubmitted">
-                        <!-- 自由記入欄 (1回制限) -->
+                        <!-- 自由記入欄 -->
                         <div class="free-input-area">
                             <div style="font-size:0.8rem; font-weight:bold; margin-bottom:5px;">
-                                🖊️ 自由記入 (1枚だけ作れます)
+                                🖊️ 自由記入 ({{ settings.freeCardLimit || 1 }}枚まで作れます)
+                                <span v-if="createdFreeCardCount > 0" style="color:#2e8b57;"> - {{ createdFreeCardCount
+                                    }}/{{ settings.freeCardLimit || 1 }}枚作成済</span>
                             </div>
-                            <div v-if="!hasCreatedFreeCard">
+                            <div v-if="canCreateFreeCard">
                                 <div class="radio-group">
                                     <label><input type="radio" v-model="freeInputType" :value="5"> 5文字(上/下)</label>
                                     <label><input type="radio" v-model="freeInputType" :value="7"> 7文字(中)</label>
@@ -863,7 +881,7 @@
                                 </div>
                             </div>
                             <div v-else style="font-size:0.85rem; color:#2e8b57; text-align:center;">
-                                ※ 自由記入カード作成済み
+                                ※ 自由記入カード作成上限に達しました
                             </div>
                         </div>
 
@@ -2028,7 +2046,8 @@
                         genreNormal: 0,
                         genreAbnormal: 10,
                         genreNeta: 0,
-                        speechEnabled: true // 俳句演出読み上げ
+                        speechEnabled: true, // 俳句演出読み上げ
+                        freeCardLimit: 1 // 自由記入枚数
                     },
                     tempSettings: { // 編集用
                         timeLimitMin: 5,
@@ -2041,7 +2060,8 @@
                         genreNormal: 0,
                         genreAbnormal: 10,
                         genreNeta: 0,
-                        speechEnabled: true // 俳句演出読み上げ
+                        speechEnabled: true, // 俳句演出読み上げ
+                        freeCardLimit: 1 // 自由記入枚数
                     },
                     roundStartTime: null,
                     timeLeft: 0,
@@ -2055,9 +2075,15 @@
                     const p = this.players.find(x => x.uid === this.myUid);
                     return p ? p.hand : { fives: [], sevens: [] };
                 },
-                hasCreatedFreeCard() {
-                    if (!this.myHand) return false;
-                    return (this.myHand.fives.some(c => c.isFree) || this.myHand.sevens.some(c => c.isFree));
+                createdFreeCardCount() {
+                    if (!this.myHand) return 0;
+                    const freeInFives = this.myHand.fives.filter(c => c.isFree).length;
+                    const freeInSevens = this.myHand.sevens.filter(c => c.isFree).length;
+                    return freeInFives + freeInSevens;
+                },
+                canCreateFreeCard() {
+                    const limit = this.settings.freeCardLimit || 1;
+                    return this.createdFreeCardCount < limit;
                 },
                 currentDraftScore() {
                     let s = 0;
@@ -2403,6 +2429,7 @@
                                     this.tempSettings.genreAbnormal = this.settings.genreAbnormal || 10;
                                     this.tempSettings.genreNeta = this.settings.genreNeta || 0;
                                     this.tempSettings.speechEnabled = (this.settings.speechEnabled !== undefined) ? this.settings.speechEnabled : true;
+                                    this.tempSettings.freeCardLimit = this.settings.freeCardLimit || 1;
                                 }
                             } else {
                                 this.viewState = 'GAME';
@@ -2987,7 +3014,8 @@
                         genreNormal: this.tempSettings.genreNormal,
                         genreAbnormal: this.tempSettings.genreAbnormal,
                         genreNeta: this.tempSettings.genreNeta,
-                        speechEnabled: this.tempSettings.speechEnabled
+                        speechEnabled: this.tempSettings.speechEnabled,
+                        freeCardLimit: this.tempSettings.freeCardLimit || 1
                     };
                     await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
                 },
