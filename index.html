@@ -652,32 +652,28 @@
                         </div>
                     </div>
                     <p style="font-size:0.8rem; color:#666; margin-top:2px;">
-                        5・7・5・7・7の短歌を詠みます（俳句演出はOFFになります）
+                        5・7・5・7・7の短歌を詠みます（俳句演出も利用可能です）
                     </p>
                 </div>
 
                 <div style="margin-bottom:10px;">
                     <label style="display:block; font-weight:bold;">🃏 配布枚数 (5文字)</label>
                     <div v-if="isMeMaster">
-                        <input type="range" v-model.number="tempSettings.handSizeFive" min="1" max="10" step="1"
-                            style="width:100%;" @change="saveSettings">
-                        <div style="text-align:right;">{{ tempSettings.handSizeFive || 10 }} 枚</div>
+                        <input type="range" v-model.number="tempSettings.handSizeFive" min="1" max="15" step="1"
+                            style="width:100%;">
+                        <div style="text-align:right;">{{ tempSettings.handSizeFive }}枚</div>
                     </div>
-                    <div v-else>
-                        {{ settings.handSizeFive || 10 }} 枚
-                    </div>
+                    <div v-else style="text-align:right;">{{ settings.handSizeFive }}枚</div>
                 </div>
 
                 <div style="margin-bottom:10px;">
                     <label style="display:block; font-weight:bold;">🃏 配布枚数 (7文字)</label>
                     <div v-if="isMeMaster">
-                        <input type="range" v-model.number="tempSettings.handSizeSeven" min="1" max="10" step="1"
-                            style="width:100%;" @change="saveSettings">
-                        <div style="text-align:right;">{{ tempSettings.handSizeSeven || 5 }} 枚</div>
+                        <input type="range" v-model.number="tempSettings.handSizeSeven" min="1" max="15" step="1"
+                            style="width:100%;">
+                        <div style="text-align:right;">{{ tempSettings.handSizeSeven }}枚</div>
                     </div>
-                    <div v-else>
-                        {{ settings.handSizeSeven || 5 }} 枚
-                    </div>
+                    <div v-else style="text-align:right;">{{ settings.handSizeSeven }}枚</div>
                 </div>
 
                 <div style="margin-bottom:10px;">
@@ -936,10 +932,8 @@
 
                         <div style="margin-top:15px; text-align:center;">
                             <label
-                                style="display:inline-flex; align-items:center; gap:5px; padding:8px; background:#fff8dc; border:1px solid #ffd700; border-radius:4px; font-weight:bold; cursor:pointer;"
-                                :style="{opacity: settings.tankaMode ? 0.5 : 1, pointerEvents: settings.tankaMode ? 'none' : 'auto'}">
-                                <input type="checkbox" v-model="useSpecialEffect"
-                                    :disabled="hasMySpecialEffectUsed || settings.tankaMode">
+                                style="display:inline-flex; align-items:center; gap:5px; padding:8px; background:#fff8dc; border:1px solid #ffd700; border-radius:4px; font-weight:bold; cursor:pointer;">
+                                <input type="checkbox" v-model="useSpecialEffect" :disabled="hasMySpecialEffectUsed">
                                 <span>✨ 俳句演出 (1試合に1回のみ)</span>
                             </label>
                             <div v-if="hasMySpecialEffectUsed" style="font-size:0.75rem; color:red; margin-top:2px;">
@@ -1997,21 +1991,47 @@
             }
 
             const pickOneByGenre = (available) => {
-                const total = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
-                const rand = Math.random() * total;
-                let genre;
-                if (rand < genreRatios.normal) {
-                    genre = "normal";
-                } else if (rand < genreRatios.normal + genreRatios.abnormal) {
-                    genre = "abnormal";
-                } else {
-                    genre = "neta";
-                }
+                // 1. 利用可能なカードの中から、設定された比率に基づいてジャンルを抽選
+                // ただし、availableに含まれるジャンルのみで再計算すべきだが、厳密な比率より「0のものは出さない」を優先する調整
 
-                const candidates = available.filter(w => w.genre === genre);
+                // まず、設定で「0」になっているジャンルは除外したいが、
+                // availableにそのジャンルのカードしか残っていない場合は出さざるを得ない
+
+                const ratioSum = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
+
+                // ターゲットジャンルを決定する関数
+                const decideGenre = () => {
+                    if (ratioSum === 0) return "any"; // 全て0ならなんでも
+                    const r = Math.random() * ratioSum;
+                    if (r < genreRatios.normal) return "normal";
+                    if (r < genreRatios.normal + genreRatios.abnormal) return "abnormal";
+                    return "neta";
+                };
+
+                let targetGenre = decideGenre();
+
+                // そのジャンルのカードがavailableにあるか確認
+                let candidates = available.filter(w => w.genre === targetGenre);
+
                 if (candidates.length === 0) {
+                    // ターゲットジャンルが無い（枯渇した）場合
+                    // 設定で許可されている(>0)他のジャンルから探す
+                    const allowedGenres = [];
+                    if (genreRatios.normal > 0) allowedGenres.push("normal");
+                    if (genreRatios.abnormal > 0) allowedGenres.push("abnormal");
+                    if (genreRatios.neta > 0) allowedGenres.push("neta");
+
+                    // allowedGenresの中で、availableに存在するものを探す
+                    const fallbackCandidates = available.filter(w => allowedGenres.includes(w.genre));
+
+                    if (fallbackCandidates.length > 0) {
+                        return fallbackCandidates[Math.floor(Math.random() * fallbackCandidates.length)];
+                    }
+
+                    // それでも無い（許可されたジャンルが全て枯渇）なら、残っているカードからなんでもいいので出す
                     return available[Math.floor(Math.random() * available.length)];
                 }
+
                 return candidates[Math.floor(Math.random() * candidates.length)];
             };
 
@@ -2668,6 +2688,10 @@
                     const middle = cleanText(haiku.middle.text);
                     const bottom = cleanText(haiku.bottom.text);
                     const parts = [top, middle, bottom];
+                    if (haiku.fourth && haiku.fifth) {
+                        parts.push(cleanText(haiku.fourth.text));
+                        parts.push(cleanText(haiku.fifth.text));
+                    }
 
                     // 順番に読み上げる（前のパートが終わったら次を読む）
                     let index = 0;
@@ -2761,12 +2785,25 @@
                 // 読み上げ無効時の順次表示
                 showPhrasesSequentially(onComplete) {
                     this.visiblePhraseIndex = -1;
+
+                    const isTanka = !!(this.specialEffectHaiku && this.specialEffectHaiku.fourth);
+
                     setTimeout(() => { this.visiblePhraseIndex = 0; }, 50);   // 上五
                     setTimeout(() => { this.visiblePhraseIndex = 1; }, 500);  // 中七
                     setTimeout(() => { this.visiblePhraseIndex = 2; }, 950);  // 下五
-                    // 最後の表示から1秒後にコールバック
-                    if (onComplete) {
-                        setTimeout(onComplete, 1950);
+
+                    if (isTanka) {
+                        setTimeout(() => { this.visiblePhraseIndex = 3; }, 1400); // 7
+                        setTimeout(() => { this.visiblePhraseIndex = 4; }, 1850); // 7
+                        // 最後の表示から1秒後にコールバック
+                        if (onComplete) {
+                            setTimeout(onComplete, 2850);
+                        }
+                    } else {
+                        // 最後の表示から1秒後にコールバック
+                        if (onComplete) {
+                            setTimeout(onComplete, 1950);
+                        }
                     }
                 },
 
@@ -3158,7 +3195,6 @@
 
                 handleTankaChange() {
                     if (this.tempSettings.tankaMode) {
-                        this.tempSettings.speechEnabled = false; // 強制OFF
                         // 7文字カードの枚数を増やすことを推奨（自動設定）
                         if (this.tempSettings.handSizeSeven < 10) {
                             this.tempSettings.handSizeSeven = 10;
