@@ -641,6 +641,22 @@
                 </div>
 
                 <div style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-weight:bold;">🎋 短歌モード (57577)</label>
+                        <div v-if="isMeMaster">
+                            <input type="checkbox" v-model="tempSettings.tankaMode" style="transform:scale(1.5);"
+                                @change="handleTankaChange">
+                        </div>
+                        <div v-else>
+                            {{ settings.tankaMode ? 'ON' : 'OFF' }}
+                        </div>
+                    </div>
+                    <p style="font-size:0.8rem; color:#666; margin-top:2px;">
+                        5・7・5・7・7の短歌を詠みます（俳句演出はOFFになります）
+                    </p>
+                </div>
+
+                <div style="margin-bottom:10px;">
                     <label style="display:block; font-weight:bold;">🃏 配布枚数 (5文字)</label>
                     <div v-if="isMeMaster">
                         <input type="range" v-model.number="tempSettings.handSizeFive" min="1" max="10" step="1"
@@ -851,6 +867,16 @@
                         <div class="haiku-slot" :class="getSlotClass(myDraft.bottom)" @click="removePart('bottom')">
                             {{ myDraft.bottom ? myDraft.bottom.text : '（下五）' }}
                         </div>
+                        <!-- 短歌用: 第4句(7) -->
+                        <div v-if="settings.tankaMode" class="haiku-slot" :class="getSlotClass(myDraft.fourth)"
+                            @click="removePart('fourth')">
+                            {{ myDraft.fourth ? myDraft.fourth.text : '（七）' }}
+                        </div>
+                        <!-- 短歌用: 第5句(7) -->
+                        <div v-if="settings.tankaMode" class="haiku-slot" :class="getSlotClass(myDraft.fifth)"
+                            @click="removePart('fifth')">
+                            {{ myDraft.fifth ? myDraft.fifth.text : '（七）' }}
+                        </div>
 
                         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                             <button class="btn btn-danger" @click="resetDraft" :disabled="hasSubmitted">
@@ -910,8 +936,10 @@
 
                         <div style="margin-top:15px; text-align:center;">
                             <label
-                                style="display:inline-flex; align-items:center; gap:5px; padding:8px; background:#fff8dc; border:1px solid #ffd700; border-radius:4px; font-weight:bold; cursor:pointer;">
-                                <input type="checkbox" v-model="useSpecialEffect" :disabled="hasMySpecialEffectUsed">
+                                style="display:inline-flex; align-items:center; gap:5px; padding:8px; background:#fff8dc; border:1px solid #ffd700; border-radius:4px; font-weight:bold; cursor:pointer;"
+                                :style="{opacity: settings.tankaMode ? 0.5 : 1, pointerEvents: settings.tankaMode ? 'none' : 'auto'}">
+                                <input type="checkbox" v-model="useSpecialEffect"
+                                    :disabled="hasMySpecialEffectUsed || settings.tankaMode">
                                 <span>✨ 俳句演出 (1試合に1回のみ)</span>
                             </label>
                             <div v-if="hasMySpecialEffectUsed" style="font-size:0.75rem; color:red; margin-top:2px;">
@@ -932,7 +960,7 @@
                         </div>
 
                         <button class="btn btn-primary" style="margin-top:10px;" @click="submitHaiku"
-                            :disabled="!myDraft.top || !myDraft.middle || !myDraft.bottom">
+                            :disabled="!canSubmitHaiku">
                             詠む（提出）
                         </button>
                     </div>
@@ -975,6 +1003,14 @@
                             }}</span>　
                         <span :style="{color: haiku.bottom.isOni ? 'purple' : 'inherit'}">{{ haiku.bottom.text
                             }}</span>
+
+                        <template v-if="haiku.fourth && haiku.fifth">
+                            <br>
+                            <span :style="{color: haiku.fourth.isOni ? 'purple' : 'inherit'}"
+                                style="margin-left:1em;">{{ haiku.fourth.text }}</span>　
+                            <span :style="{color: haiku.fifth.isOni ? 'purple' : 'inherit'}">{{ haiku.fifth.text
+                                }}</span>
+                        </template>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#888;">
@@ -1075,7 +1111,15 @@
                     </div>
 
                     <div style="font-size:1.2rem; font-weight:bold; text-align:center; margin:10px 0;">
-                        {{ haiku.top.text }}　{{ haiku.middle.text }}　{{ haiku.bottom.text }}
+                        <div style="font-size:1.2rem; font-weight:bold; text-align:center; margin:10px 0;">
+                            {{ haiku.top.text }}　{{ haiku.middle.text }}　{{ haiku.bottom.text }}
+                            <template v-if="haiku.fourth && haiku.fifth">
+                                <br>
+                                <span style="display:inline-block; margin-left:1em;">
+                                    {{ haiku.fourth.text }}　{{ haiku.fifth.text }}
+                                </span>
+                            </template>
+                        </div>
                     </div>
                     <div style="text-align:right; font-weight:bold; color:var(--sub-color);">
                         詠：{{ getPlayerName(haiku.userId) }}
@@ -1120,7 +1164,15 @@
                     </div>
 
                     <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
-                        {{ h.top.text }}　{{ h.middle.text }}　{{ h.bottom.text }}
+                        <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
+                            {{ h.top.text }}　{{ h.middle.text }}　{{ h.bottom.text }}
+                            <template v-if="h.fourth && h.fifth">
+                                <br>
+                                <span style="display:inline-block; margin-left:1em;">
+                                    {{ h.fourth.text }}　{{ h.fifth.text }}
+                                </span>
+                            </template>
+                        </div>
                     </div>
 
                     <div style="text-align:right; font-weight:bold; color:var(--sub-color); font-size:0.9rem;">
@@ -1141,7 +1193,15 @@
                         選者: {{ item.fanNames.join('、') }}
                     </div>
                     <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
-                        {{ item.haiku.top.text }}　{{ item.haiku.middle.text }}　{{ item.haiku.bottom.text }}
+                        <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
+                            {{ item.haiku.top.text }}　{{ item.haiku.middle.text }}　{{ item.haiku.bottom.text }}
+                            <template v-if="item.haiku.fourth && item.haiku.fifth">
+                                <br>
+                                <span style="display:inline-block; margin-left:1em;">
+                                    {{ item.haiku.fourth.text }}　{{ item.haiku.fifth.text }}
+                                </span>
+                            </template>
+                        </div>
                     </div>
                     <div style="text-align:right; font-weight:bold; color:var(--sub-color); font-size:0.9rem;">
                         詠：{{ getPlayerName(item.haiku.userId) }}
@@ -1242,6 +1302,9 @@
                         <div v-for="(h, i) in record.mvpHaikus" :key="i" class="tanzaku"
                             style="margin-bottom:5px; padding:5px; border:1px solid gold; font-size:1rem;">
                             {{ i+1 }}位: {{ h.top.text }} {{ h.middle.text }} {{ h.bottom.text }}
+                            <template v-if="h.fourth && h.fifth">
+                                {{ h.fourth.text }} {{ h.fifth.text }}
+                            </template>
                             <br><span style="font-size:0.8rem; color:#666;">(詠: {{ getPlayerNameFromRecord(record,
                                 h.userId) }})</span>
                         </div>
@@ -1253,6 +1316,9 @@
                         <div v-for="(item, idx) in getFavoritedHaikusFromRecord(record)" :key="idx" class="tanzaku"
                             style="margin-bottom:5px; padding:5px; border:1px solid var(--fav-color); font-size:1rem; background:#fffaf0;">
                             ★ {{ item.haiku.top.text }} {{ item.haiku.middle.text }} {{ item.haiku.bottom.text }}
+                            <template v-if="item.haiku.fourth && item.haiku.fifth">
+                                {{ item.haiku.fourth.text }} {{ item.haiku.fifth.text }}
+                            </template>
                             <br><span style="font-size:0.8rem; color:#666;">(詠: {{ getPlayerNameFromRecord(record,
                                 item.haiku.userId) }}) / 選: {{ item.fanNames.join('、') }}</span>
                         </div>
@@ -2011,6 +2077,8 @@
                     isSpecialEffectDone: false, // 演出再生済みフラグ
                     visiblePhraseIndex: -1, // 読み上げ同期用（-1:非表示, 0:上五, 1:中七, 2:下五）
 
+                    lastFilledSeven: null, // 短歌モード用：最後に埋めた7文字スロット (middle/fourth/fifth)
+
                     freeInputText: '',
                     freeInputType: 5,
 
@@ -2090,7 +2158,16 @@
                     if (this.myDraft.top) s += this.myDraft.top.score;
                     if (this.myDraft.middle) s += this.myDraft.middle.score;
                     if (this.myDraft.bottom) s += this.myDraft.bottom.score;
+                    if (this.myDraft.fourth) s += this.myDraft.fourth.score;
+                    if (this.myDraft.fifth) s += this.myDraft.fifth.score;
                     return s;
+                },
+                canSubmitHaiku() {
+                    const base = this.myDraft.top && this.myDraft.middle && this.myDraft.bottom;
+                    if (this.settings.tankaMode) {
+                        return base && this.myDraft.fourth && this.myDraft.fifth;
+                    }
+                    return base;
                 },
                 hasSubmitted() {
                     return this.currentHaikus.some(h => h.userId === this.myUid);
@@ -2709,9 +2786,14 @@
                 // --- 詠唱アクション ---
                 isCardSelected(card) {
                     const d = this.myDraft;
-                    return (d.top && d.top.id === card.id) ||
+                    if ((d.top && d.top.id === card.id) ||
                         (d.middle && d.middle.id === card.id) ||
-                        (d.bottom && d.bottom.id === card.id);
+                        (d.bottom && d.bottom.id === card.id)) return true;
+                    if (this.settings.tankaMode) {
+                        if ((d.fourth && d.fourth.id === card.id) ||
+                            (d.fifth && d.fifth.id === card.id)) return true;
+                    }
+                    return false;
                 },
                 selectFive(card) {
                     if (!this.myDraft.top) this.myDraft.top = card;
@@ -2719,7 +2801,38 @@
                     else this.myDraft.top = card;
                 },
                 selectSeven(card) {
-                    this.myDraft.middle = card;
+                    if (this.settings.tankaMode) {
+                        // サイクル: Middle -> Fourth -> Fifth -> Middle... (または空いているところへ)
+                        if (!this.myDraft.middle) {
+                            this.myDraft.middle = card;
+                            this.lastFilledSeven = 'middle';
+                        }
+                        else if (!this.myDraft.fourth) {
+                            this.myDraft.fourth = card;
+                            this.lastFilledSeven = 'fourth';
+                        }
+                        else if (!this.myDraft.fifth) {
+                            this.myDraft.fifth = card;
+                            this.lastFilledSeven = 'fifth';
+                        }
+                        else {
+                            // 全て埋まっている場合はサイクル
+                            if (this.lastFilledSeven === 'middle') {
+                                this.myDraft.fourth = card;
+                                this.lastFilledSeven = 'fourth';
+                            }
+                            else if (this.lastFilledSeven === 'fourth') {
+                                this.myDraft.fifth = card;
+                                this.lastFilledSeven = 'fifth';
+                            }
+                            else {
+                                this.myDraft.middle = card;
+                                this.lastFilledSeven = 'middle';
+                            }
+                        }
+                    } else {
+                        this.myDraft.middle = card;
+                    }
                 },
                 removePart(part) {
                     this.myDraft[part] = null;
@@ -2733,7 +2846,7 @@
                         id: 'free-' + Date.now(),
                         text: this.freeInputText,
                         type: this.freeInputType,
-                        score: 4,
+                        score: 1,
                         isOni: false,
                         isFree: true
                     };
@@ -2761,7 +2874,7 @@
                     let needDbUpdate = false;
                     const myIdx = this.players.findIndex(p => p.uid === this.myUid);
                     if (myIdx === -1) {
-                        this.myDraft = { top: null, middle: null, bottom: null };
+                        this.myDraft = { top: null, middle: null, bottom: null, fourth: null, fifth: null };
                         return;
                     }
 
@@ -2784,12 +2897,16 @@
                         await updateDoc(doc(db, "rooms", this.roomId), { players: updatedPlayers });
                     }
 
-                    this.myDraft = { top: null, middle: null, bottom: null };
+                    this.myDraft = { top: null, middle: null, bottom: null, fourth: null, fifth: null };
                 },
 
                 async submitHaiku() {
                     if (!this.myDraft.top) return;
-                    const cardScore = this.myDraft.top.score + this.myDraft.middle.score + this.myDraft.bottom.score;
+                    let cardScore = this.myDraft.top.score + this.myDraft.middle.score + this.myDraft.bottom.score;
+                    if (this.settings.tankaMode) {
+                        cardScore += (this.myDraft.fourth ? this.myDraft.fourth.score : 0);
+                        cardScore += (this.myDraft.fifth ? this.myDraft.fifth.score : 0);
+                    }
 
                     // 重複提出防止のため、ユーザーIDとラウンド情報をキーにしたIDを生成
                     const haikuId = `${this.gameCount}_${this.roundCount}_${this.myUid}`;
@@ -2809,7 +2926,9 @@
                         bonusScore: 0,
                         totalScore: 0,
                         randomSortKey: Math.random(),
-                        isSpecial: isSpecial // 演出フラグ
+                        isSpecial: isSpecial, // 演出フラグ
+                        fourth: this.settings.tankaMode ? this.myDraft.fourth : null,
+                        fifth: this.settings.tankaMode ? this.myDraft.fifth : null
                     });
 
                     // 演出を使用した場合はプレイヤー情報を更新
@@ -2846,13 +2965,26 @@
                         const botCands = topCands.filter(c => c.id !== top.id);
                         const bottom = botCands.length > 0 ? botCands[Math.floor(Math.random() * botCands.length)] : top;
 
-                        const cardScore = top.score + middle.score + bottom.score;
+                        let fourth = null;
+                        let fifth = null;
+                        if (this.settings.tankaMode) {
+                            const fourthCands = midCands.filter(c => c.id !== middle.id);
+                            fourth = fourthCands.length > 0 ? fourthCands[Math.floor(Math.random() * fourthCands.length)] : middle;
+
+                            const fifthCands = fourthCands.filter(c => c.id !== fourth.id);
+                            fifth = fifthCands.length > 0 ? fifthCands[Math.floor(Math.random() * fifthCands.length)] : middle;
+                        }
+
+                        let cardScore = top.score + middle.score + bottom.score;
+                        if (this.settings.tankaMode && fourth && fifth) {
+                            cardScore += fourth.score + fifth.score;
+                        }
 
                         const haikuId = `${this.gameCount}_${this.roundCount}_${p.uid}`;
                         const newDocRef = doc(haikusRef, haikuId);
                         batch.set(newDocRef, {
                             userId: p.uid,
-                            top, middle, bottom,
+                            top, middle, bottom, fourth, fifth,
                             gameCount: this.gameCount,
                             round: this.roundCount,
                             rank: 0, likes: [], cardScore, bonusScore: 0, totalScore: 0,
@@ -2976,7 +3108,10 @@
                 },
 
                 getHaikuCardScore(haiku) {
-                    return haiku.top.score + haiku.middle.score + haiku.bottom.score;
+                    let s = haiku.top.score + haiku.middle.score + haiku.bottom.score;
+                    if (haiku.fourth) s += haiku.fourth.score;
+                    if (haiku.fifth) s += haiku.fifth.score;
+                    return s;
                 },
                 getRankScore(rank) {
                     if (rank === 1) return 100;
@@ -3015,9 +3150,21 @@
                         genreAbnormal: this.tempSettings.genreAbnormal,
                         genreNeta: this.tempSettings.genreNeta,
                         speechEnabled: this.tempSettings.speechEnabled,
-                        freeCardLimit: this.tempSettings.freeCardLimit || 1
+                        freeCardLimit: this.tempSettings.freeCardLimit || 1,
+                        tankaMode: this.tempSettings.tankaMode || false
                     };
                     await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
+                },
+
+                handleTankaChange() {
+                    if (this.tempSettings.tankaMode) {
+                        this.tempSettings.speechEnabled = false; // 強制OFF
+                        // 7文字カードの枚数を増やすことを推奨（自動設定）
+                        if (this.tempSettings.handSizeSeven < 10) {
+                            this.tempSettings.handSizeSeven = 10;
+                        }
+                    }
+                    this.saveSettings();
                 },
 
                 async startGame() {
