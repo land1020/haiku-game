@@ -1344,21 +1344,20 @@
                                 }}</div>
                         </transition>
                         <transition name="fade">
-                            <transition name="fade">
-                                <div v-if="visiblePhraseIndex >= 2" class="phrase bottom">{{
-                                    specialEffectHaiku.bottom.text
-                                    }}</div>
-                            </transition>
-                            <transition name="fade">
-                                <div v-if="visiblePhraseIndex >= 3 && specialEffectHaiku.fourth" class="phrase fourth">
-                                    {{ specialEffectHaiku.fourth.text
-                                    }}</div>
-                            </transition>
-                            <transition name="fade">
-                                <div v-if="visiblePhraseIndex >= 4 && specialEffectHaiku.fifth" class="phrase fifth">{{
-                                    specialEffectHaiku.fifth.text
-                                    }}</div>
-                            </transition>
+                            <div v-if="visiblePhraseIndex >= 2" class="phrase bottom">{{
+                                specialEffectHaiku.bottom.text
+                                }}</div>
+                        </transition>
+                        <transition name="fade">
+                            <div v-if="visiblePhraseIndex >= 3 && specialEffectHaiku.fourth" class="phrase fourth">
+                                {{ specialEffectHaiku.fourth.text
+                                }}</div>
+                        </transition>
+                        <transition name="fade">
+                            <div v-if="visiblePhraseIndex >= 4 && specialEffectHaiku.fifth" class="phrase fifth">{{
+                                specialEffectHaiku.fifth.text
+                                }}</div>
+                        </transition>
                     </div>
                     <div class="special-footer"
                         v-if="(specialEffectHaiku.fifth ? visiblePhraseIndex >= 4 : visiblePhraseIndex >= 2)">
@@ -3382,9 +3381,9 @@
 
                         // 設定に合わせて手札を配り直す（プレイヤー間で重複なし）
                         const genreRatios = {
-                            normal: this.tempSettings.genreNormal || 0,
-                            abnormal: this.tempSettings.genreAbnormal || 10,
-                            neta: this.tempSettings.genreNeta || 0
+                            normal: (this.tempSettings.genreNormal !== undefined) ? this.tempSettings.genreNormal : 0,
+                            abnormal: (this.tempSettings.genreAbnormal !== undefined) ? this.tempSettings.genreAbnormal : 10,
+                            neta: (this.tempSettings.genreNeta !== undefined) ? this.tempSettings.genreNeta : 0
                         };
                         const allHands = generateHandsForAllPlayers(
                             this.players.length,
