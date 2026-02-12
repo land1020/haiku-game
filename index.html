@@ -398,6 +398,14 @@
             animation-delay: 0s;
         }
 
+        .phrase.fourth {
+            animation-delay: 0s;
+        }
+
+        .phrase.fifth {
+            animation-delay: 0s;
+        }
+
         .special-footer {
             position: absolute;
             bottom: -50px;
@@ -1336,11 +1344,24 @@
                                 }}</div>
                         </transition>
                         <transition name="fade">
-                            <div v-if="visiblePhraseIndex >= 2" class="phrase bottom">{{ specialEffectHaiku.bottom.text
-                                }}</div>
-                        </transition>
+                            <transition name="fade">
+                                <div v-if="visiblePhraseIndex >= 2" class="phrase bottom">{{
+                                    specialEffectHaiku.bottom.text
+                                    }}</div>
+                            </transition>
+                            <transition name="fade">
+                                <div v-if="visiblePhraseIndex >= 3 && specialEffectHaiku.fourth" class="phrase fourth">
+                                    {{ specialEffectHaiku.fourth.text
+                                    }}</div>
+                            </transition>
+                            <transition name="fade">
+                                <div v-if="visiblePhraseIndex >= 4 && specialEffectHaiku.fifth" class="phrase fifth">{{
+                                    specialEffectHaiku.fifth.text
+                                    }}</div>
+                            </transition>
                     </div>
-                    <div class="special-footer" v-if="visiblePhraseIndex >= 2">
+                    <div class="special-footer"
+                        v-if="(specialEffectHaiku.fifth ? visiblePhraseIndex >= 4 : visiblePhraseIndex >= 2)">
                         渾身の一句！！
                     </div>
                 </div>
@@ -1419,6 +1440,26 @@
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             // ■ ノーマル (5文字)
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            { text: "夜散歩", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "砂浜で", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "鏡越し", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "泥酔中", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "酒を飲み", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "月を見て", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "田舎道", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "屋上で", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "階段で", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "廊下にて", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "休み時間", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "アルバイト", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "居酒屋で", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "カラオケで", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "観覧車", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "水族館", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "公園で", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "車内にて", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "助手席で", type: 5, score: 4, isOni: false, genre: "normal" },
+            { text: "待ち合わせ", type: 5, score: 4, isOni: false, genre: "normal" },
             { text: "会社にて", type: 5, score: 3, isOni: false, genre: "normal" },
             { text: "エレベーター", type: 5, score: 4, isOni: false, genre: "normal" },
             { text: "三時間", type: 5, score: 4, isOni: false, genre: "normal" },
@@ -1523,6 +1564,26 @@
             { text: "催眠で", type: 5, score: 5, isOni: false, genre: "normal" },
             { text: "首絞めて", type: 5, score: 5, isOni: false, genre: "normal" },
             { text: "バイブ音", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "ワンパンチ", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "蹴り上げて", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "臭すぎる", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "蔑んで", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "道半ば", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "いたずらに", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "明けぬるを", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "そこはダメ", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "紅だーーー！！", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "梅の花", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "君がため", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "ひさかたの", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "いにしえの", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "見渡せば", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "もののふの", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "さざれ石の", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "君が代は", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "ちはやぶる", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "散りぬるを", type: 5, score: 5, isOni: false, genre: "normal" },
+            { text: "いきなさい", type: 5, score: 5, isOni: false, genre: "normal" },
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             // ■ アブノーマル (5文字)
@@ -1632,6 +1693,10 @@
             { text: "メスになり", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "ザコちんぽ", type: 5, score: 5, isOni: false, genre: "abnormal" },
             { text: "孕ませて", type: 5, score: 6, isOni: false, genre: "abnormal" },
+            { text: "マン拓を", type: 5, score: 6, isOni: false, genre: "abnormal" },
+            { text: "ゲイバーで", type: 5, score: 6, isOni: false, genre: "abnormal" },
+            { text: "御開帳", type: 5, score: 6, isOni: false, genre: "abnormal" },
+
             // 鬼札
             { text: "バブみある", type: 5, score: 10, isOni: true, genre: "abnormal" },
             { text: "触手攻め", type: 5, score: 10, isOni: true, genre: "abnormal" },
@@ -1690,7 +1755,8 @@
             { text: "黙れ小僧！", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "超快感", type: 5, score: 5, isOni: false, genre: "neta" },
             { text: "自害しろ", type: 5, score: 5, isOni: false, genre: "neta" },
-
+            { text: "全集中", type: 5, score: 5, isOni: false, genre: "neta" },
+            { text: "この味は！", type: 5, score: 5, isOni: false, genre: "neta" },
 
             // 鬼札
             { text: "黒歴史", type: 5, score: 10, isOni: true, genre: "neta" },
@@ -1705,6 +1771,26 @@
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             // ■ ノーマル (7文字)
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            { text: "二人だけの夜", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "手と手が触れて", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "見つめ合ってる", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "抱きしめたいな", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "キスをおねだり", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "好きと言ってよ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "ずっと一緒に", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "離さないでよ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "帰りたくない", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "終電逃し", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "朝までコース", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "君が欲しいの", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "誰にも言わず", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "秘密の場所へ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "約束してね", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "瞳を閉じて", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "吐息がかかる", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "名前を呼んで", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "背中を預け", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "心重ねて", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "一生懸命", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "電気を消して", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "声を抑えて", type: 7, score: 5, isOni: false, genre: "normal" },
@@ -1741,7 +1827,6 @@
             { text: "下半身が", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "穴があった", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "白い液体", type: 7, score: 5, isOni: false, genre: "normal" },
-            { text: "テクニック", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "道具使って", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "ひとり遊び", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "時間が止まる", type: 7, score: 5, isOni: false, genre: "normal" },
@@ -1761,6 +1846,53 @@
             { text: "公衆トイレ", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "腰を振ってよ", type: 7, score: 5, isOni: false, genre: "normal" },
             { text: "顔にまたがり", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "香りを嗅いだ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "暴れる欲望", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "終わりを告げる", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "牢獄直行", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "プロの領域", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "全裸で仰ぐ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "すっぽんぽんよ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "運命の人", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "夢中になれる", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "呼吸を止めて", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "深く繋がる", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "秘密の合図", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "夜に溶け込み", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "君の全てを", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "もう止まらない", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "全部あげるよ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "大人の時間", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "一緒に行こう", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "宇宙の真理", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "命に感謝", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "平和を願う", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "降り止まぬ雨", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "涙の行方", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "終わらない夢", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "私の秘密", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "無料クーポン", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "柔い素肌に", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "絶対領域", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "束縛の跡", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "痛いのが好き❤", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "危ない匂い", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "いけない音を", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "危険な薬", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "花の散りゆく", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "流れ来るかも", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "梅の花散る", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "夜ぞ更けにける", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "なりにけるかも", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "跡見ゆるまで", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "春はあけぼの", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "二尺伸びたる", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "千代に八千代に", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "苔のむすまで", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "いわおとなりて", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "我が世誰ぞ", type: 7, score: 5, isOni: false, genre: "normal" },
+            { text: "あとぞ恋しき", type: 7, score: 5, isOni: false, genre: "normal" },
+
             // 鬼札
             { text: "先っちょだけ", type: 7, score: 5, isOni: true, genre: "normal" },
             { text: "全てを無にする", type: 7, score: 5, isOni: true, genre: "normal" },
@@ -1858,6 +1990,15 @@
             { text: "対面座位で", type: 7, score: 5, isOni: false, genre: "abnormal" },
             { text: "背面座位で", type: 7, score: 5, isOni: false, genre: "abnormal" },
             { text: "がばがばアナル", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "テカるアヌスに", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "ヴァギナが滴る", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "センズリをこく", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "マラチンぽこちん", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "クンニリングス", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "青姦最高", type: 7, score: 6, isOni: false, genre: "abnormal" },
+            { text: "肛門性交", type: 7, score: 6, isOni: false, genre: "abnormal" },
+
+
             // 鬼札
             { text: "大量失禁", type: 7, score: 10, isOni: true, genre: "abnormal" },
             { text: "ふたなり巨乳", type: 7, score: 15, isOni: true, genre: "abnormal" },
@@ -1908,8 +2049,12 @@
             { text: "入れ替わってる！？", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "あぁ、間違いない", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "こいつはくせえッー", type: 7, score: 6, isOni: false, genre: "neta" },
-
-
+            { text: "ポコチンテゥヌス", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "マンコテカリーヌ", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "あんあんパンマン", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "顔面放屁", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "腐ってやがる", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "判断が遅い", type: 7, score: 6, isOni: false, genre: "neta" },
 
             // 鬼札
             { text: "まさか・・・暴走!?", type: 7, score: 10, isOni: true, genre: "neta" },
@@ -1990,49 +2135,63 @@
                 genreRatios = { normal: 0, abnormal: 10, neta: 0 };
             }
 
-            const pickOneByGenre = (available) => {
-                // 1. 利用可能なカードの中から、設定された比率に基づいてジャンルを抽選
-                // ただし、availableに含まれるジャンルのみで再計算すべきだが、厳密な比率より「0のものは出さない」を優先する調整
-
-                // まず、設定で「0」になっているジャンルは除外したいが、
-                // availableにそのジャンルのカードしか残っていない場合は出さざるを得ない
-
+            // 指定されたタイプ(5or7)と現在のプレイヤーの手札(currentHandArray)を受け取り、
+            // 重複しないようにカードを1枚選ぶ
+            const pickOneByGenre = (pool, type, currentHandArray) => {
                 const ratioSum = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
 
-                // ターゲットジャンルを決定する関数
+                // ターゲットジャンルを決定
                 const decideGenre = () => {
-                    if (ratioSum === 0) return "any"; // 全て0ならなんでも
+                    if (ratioSum === 0) return "any";
                     const r = Math.random() * ratioSum;
                     if (r < genreRatios.normal) return "normal";
                     if (r < genreRatios.normal + genreRatios.abnormal) return "abnormal";
                     return "neta";
                 };
 
-                let targetGenre = decideGenre();
+                const targetGenre = decideGenre();
+                let availableInPool = [];
 
-                // そのジャンルのカードがavailableにあるか確認
-                let candidates = available.filter(w => w.genre === targetGenre);
-
-                if (candidates.length === 0) {
-                    // ターゲットジャンルが無い（枯渇した）場合
-                    // 設定で許可されている(>0)他のジャンルから探す
-                    const allowedGenres = [];
-                    if (genreRatios.normal > 0) allowedGenres.push("normal");
-                    if (genreRatios.abnormal > 0) allowedGenres.push("abnormal");
-                    if (genreRatios.neta > 0) allowedGenres.push("neta");
-
-                    // allowedGenresの中で、availableに存在するものを探す
-                    const fallbackCandidates = available.filter(w => allowedGenres.includes(w.genre));
-
-                    if (fallbackCandidates.length > 0) {
-                        return fallbackCandidates[Math.floor(Math.random() * fallbackCandidates.length)];
-                    }
-
-                    // それでも無い（許可されたジャンルが全て枯渇）なら、残っているカードからなんでもいいので出す
-                    return available[Math.floor(Math.random() * available.length)];
+                if (targetGenre === "any") {
+                    availableInPool = pool;
+                } else {
+                    availableInPool = pool.filter(w => w.genre === targetGenre);
                 }
 
-                return candidates[Math.floor(Math.random() * candidates.length)];
+                // プールに候補がある場合
+                if (availableInPool.length > 0) {
+                    return availableInPool[Math.floor(Math.random() * availableInPool.length)];
+                }
+
+                // --- プール枯渇時の再抽選ロジック ---
+                // WORD_DICTIONARYから同タイプ・同ジャンルの候補を探す
+                // ただし、現在のプレイヤーの手札(currentHandArray)に含まれるものは除外する
+                let dictionaryCandidates = [];
+                if (targetGenre === "any") {
+                    dictionaryCandidates = WORD_DICTIONARY.filter(w => w.type === type);
+                } else {
+                    dictionaryCandidates = WORD_DICTIONARY.filter(w => w.type === type && w.genre === targetGenre);
+                }
+
+                // 自分の手札にあるテキストを除外
+                const currentTexts = new Set(currentHandArray.map(c => c.text));
+                const validCandidates = dictionaryCandidates.filter(w => !currentTexts.has(w.text));
+
+                if (validCandidates.length > 0) {
+                    // 重複しない候補から抽選
+                    return validCandidates[Math.floor(Math.random() * validCandidates.length)];
+                }
+
+                // それでも候補がない（そのジャンルのカードを全て手札に持っている等）場合
+                // ジャンル不問でタイプが合うものから、手札にないものを探す
+                const fallbackAll = WORD_DICTIONARY.filter(w => w.type === type && !currentTexts.has(w.text));
+                if (fallbackAll.length > 0) {
+                    return fallbackAll[Math.floor(Math.random() * fallbackAll.length)];
+                }
+
+                // どうしようもない場合（辞書の同タイプカードを全て持っている！？）は、重複覚悟で辞書からランダム
+                const ultimateFallback = WORD_DICTIONARY.filter(w => w.type === type);
+                return ultimateFallback[Math.floor(Math.random() * ultimateFallback.length)];
             };
 
             const fivesPool = [...WORD_DICTIONARY.filter(w => w.type === 5)];
@@ -2042,24 +2201,30 @@
             for (let p = 0; p < playerCount; p++) {
                 const hand = { fives: [], sevens: [] };
 
-                // 5文字カードを配布
-                for (let i = 0; i < count5 && fivesPool.length > 0; i++) {
-                    const word = pickOneByGenre(fivesPool);
+                // 5文字カードを配布 (プール枯渇しても規定枚数まで配り続ける)
+                for (let i = 0; i < count5; i++) {
+                    // pickOneByGenreで返すオブジェクトは辞書参照(word)なので、IDはあとで付与
+                    const word = pickOneByGenre(fivesPool, 5, hand.fives);
+
+                    // プールから削除（もしプール由来なら）
                     const idx = fivesPool.findIndex(w => w.text === word.text);
                     if (idx !== -1) {
                         fivesPool.splice(idx, 1);
-                        hand.fives.push({ ...word, id: Math.random().toString(36).substr(2, 9) });
                     }
+
+                    hand.fives.push({ ...word, id: Math.random().toString(36).substr(2, 9) });
                 }
 
                 // 7文字カードを配布
-                for (let i = 0; i < count7 && sevensPool.length > 0; i++) {
-                    const word = pickOneByGenre(sevensPool);
+                for (let i = 0; i < count7; i++) {
+                    const word = pickOneByGenre(sevensPool, 7, hand.sevens);
+
                     const idx = sevensPool.findIndex(w => w.text === word.text);
                     if (idx !== -1) {
                         sevensPool.splice(idx, 1);
-                        hand.sevens.push({ ...word, id: Math.random().toString(36).substr(2, 9) });
                     }
+
+                    hand.sevens.push({ ...word, id: Math.random().toString(36).substr(2, 9) });
                 }
 
                 hands.push(hand);
