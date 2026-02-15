@@ -197,6 +197,14 @@
             color: #006400;
         }
 
+        .haiku-slot.active {
+            border-color: var(--accent-color);
+            background-color: #fff0f5;
+            box-shadow: 0 0 5px var(--accent-color);
+            transform: scale(1.02);
+            transition: all 0.2s;
+        }
+
         /* 自由記入エリア */
         .free-input-area {
             background: #f9f9f9;
@@ -860,25 +868,27 @@
                     <!-- プレビュー & リセット -->
                     <div class="haiku-preview">
                         <!-- 上五 -->
-                        <div class="haiku-slot" :class="getSlotClass(myDraft.top)" @click="removePart('top')">
+                        <div class="haiku-slot" :class="getSlotClass(myDraft.top, 'top')" @click="activateSlot('top')">
                             {{ myDraft.top ? myDraft.top.text : '（上五）' }}
                         </div>
                         <!-- 中七 -->
-                        <div class="haiku-slot" :class="getSlotClass(myDraft.middle)" @click="removePart('middle')">
+                        <div class="haiku-slot" :class="getSlotClass(myDraft.middle, 'middle')"
+                            @click="activateSlot('middle')">
                             {{ myDraft.middle ? myDraft.middle.text : '（中七）' }}
                         </div>
                         <!-- 下五 -->
-                        <div class="haiku-slot" :class="getSlotClass(myDraft.bottom)" @click="removePart('bottom')">
+                        <div class="haiku-slot" :class="getSlotClass(myDraft.bottom, 'bottom')"
+                            @click="activateSlot('bottom')">
                             {{ myDraft.bottom ? myDraft.bottom.text : '（下五）' }}
                         </div>
                         <!-- 短歌用: 第4句(7) -->
-                        <div v-if="settings.tankaMode" class="haiku-slot" :class="getSlotClass(myDraft.fourth)"
-                            @click="removePart('fourth')">
+                        <div v-if="settings.tankaMode" class="haiku-slot"
+                            :class="getSlotClass(myDraft.fourth, 'fourth')" @click="activateSlot('fourth')">
                             {{ myDraft.fourth ? myDraft.fourth.text : '（七）' }}
                         </div>
                         <!-- 短歌用: 第5句(7) -->
-                        <div v-if="settings.tankaMode" class="haiku-slot" :class="getSlotClass(myDraft.fifth)"
-                            @click="removePart('fifth')">
+                        <div v-if="settings.tankaMode" class="haiku-slot" :class="getSlotClass(myDraft.fifth, 'fifth')"
+                            @click="activateSlot('fifth')">
                             {{ myDraft.fifth ? myDraft.fifth.text : '（七）' }}
                         </div>
 
@@ -1404,7 +1414,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import {
             getFirestore, collection, doc, getDoc, setDoc, updateDoc,
-            onSnapshot, addDoc, arrayUnion, increment, writeBatch, deleteDoc, getDocs
+            onSnapshot, addDoc, arrayUnion, increment, writeBatch, deleteDoc, getDocs, runTransaction
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
@@ -1893,11 +1903,11 @@
             { text: "あとぞ恋しき", type: 7, score: 5, isOni: false, genre: "normal" },
 
             // 鬼札
-            { text: "先っちょだけ", type: 7, score: 5, isOni: true, genre: "normal" },
-            { text: "全てを無にする", type: 7, score: 5, isOni: true, genre: "normal" },
-            { text: "枕営業", type: 7, score: 5, isOni: true, genre: "normal" },
-            { text: "大人の関係", type: 7, score: 5, isOni: true, genre: "normal" },
-            { text: "完全犯罪", type: 7, score: 5, isOni: true, genre: "normal" },
+            { text: "先っちょだけ", type: 7, score: 10, isOni: true, genre: "normal" },
+            { text: "全てを無にする", type: 7, score: 10, isOni: true, genre: "normal" },
+            { text: "枕営業", type: 7, score: 10, isOni: true, genre: "normal" },
+            { text: "大人の関係", type: 7, score: 10, isOni: true, genre: "normal" },
+            { text: "完全犯罪", type: 7, score: 10, isOni: true, genre: "normal" },
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             // ■ アブノーマル (7文字)
@@ -2000,7 +2010,7 @@
 
             // 鬼札
             { text: "大量失禁", type: 7, score: 10, isOni: true, genre: "abnormal" },
-            { text: "ふたなり巨乳", type: 7, score: 15, isOni: true, genre: "abnormal" },
+            { text: "ふたなり巨乳", type: 7, score: 10, isOni: true, genre: "abnormal" },
             { text: "チン媚ダンス", type: 7, score: 10, isOni: true, genre: "abnormal" },
             { text: "縦割れあなる", type: 7, score: 10, isOni: true, genre: "abnormal" },
             { text: "濁点喘ぎ", type: 7, score: 10, isOni: true, genre: "abnormal" },
@@ -2048,7 +2058,7 @@
             { text: "入れ替わってる！？", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "あぁ、間違いない", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "こいつはくせえッー", type: 7, score: 6, isOni: false, genre: "neta" },
-            { text: "ポコチンテゥヌス", type: 7, score: 6, isOni: false, genre: "neta" },
+            { text: "ポコチンティヌス", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "マンコテカリーヌ", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "あんあんパンマン", type: 7, score: 6, isOni: false, genre: "neta" },
             { text: "顔面放屁", type: 7, score: 6, isOni: false, genre: "neta" },
@@ -2259,6 +2269,7 @@
                     specialEffectHaiku: null,
                     specialEffectQueue: [], // 複数の演出用キュー
                     isSpecialEffectDone: false, // 演出再生済みフラグ
+                    activeSlot: null, // 任意選択スロット
                     visiblePhraseIndex: -1, // 読み上げ同期用（-1:非表示, 0:上五, 1:中七, 2:下五）
 
                     lastFilledSeven: null, // 短歌モード用：最後に埋めた7文字スロット (middle/fourth/fifth)
@@ -2979,9 +2990,17 @@
                         selected: this.isCardSelected(card)
                     };
                 },
-                getSlotClass(card) {
-                    if (!card) return {};
-                    return { filled: true, oni: card.isOni, free: card.isFree };
+                getSlotClass(card, part) {
+                    const classes = {};
+                    if (card) {
+                        classes.filled = true;
+                        if (card.isOni) classes.oni = true;
+                        if (card.isFree) classes.free = true;
+                    }
+                    if (this.activeSlot === part) {
+                        classes.active = true;
+                    }
+                    return classes;
                 },
 
                 // --- 詠唱アクション ---
@@ -2996,12 +3015,45 @@
                     }
                     return false;
                 },
+                activateSlot(part) {
+                    if (this.activeSlot === part) {
+                        this.activeSlot = null; // Toggle off
+                    } else {
+                        this.activeSlot = part;
+                    }
+                },
                 selectFive(card) {
+                    // アクティブスロットがあればそこにセット（ただし5文字枠のみ）
+                    if (this.activeSlot === 'top' || this.activeSlot === 'bottom') {
+                        this.myDraft[this.activeSlot] = card;
+                        this.activeSlot = null; // 自動で選択解除
+                        return;
+                    }
+                    // アクティブスロットが7文字枠なら、5文字カードはセットできない（または無視してシーケンシャル）
+                    // ここでは「無視してシーケンシャル」にする（誤操作対策）
+                    if (this.activeSlot === 'middle' || this.activeSlot === 'fourth' || this.activeSlot === 'fifth') {
+                        // 7文字枠が選択されているのに5文字カードをクリック -> 何もしないか、シーケンシャルか。
+                        // ユーザーの意図（間違ってクリック）を考えると、変なところに入るよりは何もしない方が安全かもだが、
+                        // 元の挙動（シーケンシャル）を維持するなら下記。
+                        // 今回は「選択枠があればそこ優先、適合しなければシーケンシャル」とする。
+                    }
+
                     if (!this.myDraft.top) this.myDraft.top = card;
                     else if (!this.myDraft.bottom) this.myDraft.bottom = card;
                     else this.myDraft.top = card;
                 },
                 selectSeven(card) {
+                    // アクティブスロットがあればそこにセット（ただし7文字枠のみ）
+                    if (this.activeSlot === 'middle' ||
+                        (this.settings.tankaMode && (this.activeSlot === 'fourth' || this.activeSlot === 'fifth'))) {
+                        this.myDraft[this.activeSlot] = card;
+                        this.activeSlot = null;
+                        if (this.activeSlot === 'middle') this.lastFilledSeven = 'middle'; // 履歴更新
+                        else if (this.activeSlot === 'fourth') this.lastFilledSeven = 'fourth';
+                        else if (this.activeSlot === 'fifth') this.lastFilledSeven = 'fifth';
+                        return;
+                    }
+
                     if (this.settings.tankaMode) {
                         // サイクル: Middle -> Fourth -> Fifth -> Middle... (または空いているところへ)
                         if (!this.myDraft.middle) {
@@ -3042,6 +3094,7 @@
                 // --- 自由記入追加 ---
                 async addFreeCard() {
                     if (!this.freeInputText) return;
+                    if (!this.myUid) return;
 
                     const newCard = {
                         id: 'free-' + Date.now(),
@@ -3052,22 +3105,53 @@
                         isFree: true
                     };
 
-                    const myIdx = this.players.findIndex(p => p.uid === this.myUid);
-                    if (myIdx === -1) return;
+                    const roomRef = doc(db, "rooms", this.roomId);
 
-                    const updatedPlayers = [...this.players];
-                    const myHand = { ...updatedPlayers[myIdx].hand };
+                    try {
+                        await runTransaction(db, async (transaction) => {
+                            const roomDoc = await transaction.get(roomRef);
+                            if (!roomDoc.exists()) {
+                                throw "Room does not exist!";
+                            }
 
-                    if (this.freeInputType === 5) {
-                        myHand.fives = [newCard, ...myHand.fives];
-                    } else {
-                        myHand.sevens = [newCard, ...myHand.sevens];
+                            const data = roomDoc.data();
+                            const players = data.players || [];
+                            const myIdx = players.findIndex(p => p.uid === this.myUid);
+
+                            if (myIdx === -1) {
+                                throw "Player not found in room!";
+                            }
+
+                            // プレイヤー情報をコピーして更新
+                            const updatedPlayers = [...players];
+                            const myHand = { ...updatedPlayers[myIdx].hand };
+
+                            // 現在の自由記入枚数チェック（念のため）
+                            const currentFreeCount = (myHand.fives.filter(c => c.isFree).length) + (myHand.sevens.filter(c => c.isFree).length);
+                            const limit = this.settings.freeCardLimit || 1;
+
+                            if (currentFreeCount >= limit) {
+                                throw "自由記入カードの上限に達しています";
+                            }
+
+                            if (this.freeInputType === 5) {
+                                myHand.fives = [newCard, ...myHand.fives];
+                            } else {
+                                myHand.sevens = [newCard, ...myHand.sevens];
+                            }
+
+                            updatedPlayers[myIdx].hand = myHand;
+
+                            transaction.update(roomRef, { players: updatedPlayers });
+                        });
+
+                        this.freeInputText = '';
+                        console.log("Free card added successfully via transaction");
+
+                    } catch (e) {
+                        console.error("Add free card failed: ", e);
+                        alert("追加に失敗しました: " + e);
                     }
-
-                    updatedPlayers[myIdx].hand = myHand;
-
-                    await updateDoc(doc(db, "rooms", this.roomId), { players: updatedPlayers });
-                    this.freeInputText = '';
                 },
 
                 // --- リセット ---
@@ -3394,7 +3478,8 @@
                         const refreshedPlayers = this.players.map((p, idx) => {
                             return {
                                 ...p,
-                                hand: allHands[idx]
+                                hand: allHands[idx],
+                                specialEffectUsed: false // ゲーム開始時にリセット
                             };
                         });
 
@@ -3526,7 +3611,8 @@
                         score: 0,
                         totalLikes: 0,
                         // winCountは維持される(pに含まれるため)
-                        hand: allHands[idx]
+                        hand: allHands[idx],
+                        specialEffectUsed: false // 次のゲーム開始時にリセット
                     }));
                     const firstMaster = resetPlayers[0].uid;
 
