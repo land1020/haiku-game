@@ -1045,18 +1045,15 @@
 
                 <div v-for="haiku in sortedHaikusForJudging" :key="haiku.id" class="tanzaku">
                     <div style="font-size:1.2rem; font-weight:bold; text-align:center; margin-bottom:5px;">
-                        <span :style="{color: haiku.top.isOni ? 'purple' : 'inherit'}">{{ haiku.top.text }}</span>　
-                        <span :style="{color: haiku.middle.isOni ? 'purple' : 'inherit'}">{{ haiku.middle.text
-                            }}</span>　
-                        <span :style="{color: haiku.bottom.isOni ? 'purple' : 'inherit'}">{{ haiku.bottom.text
-                            }}</span>
+                        <span :style="getTextStyle(haiku.top)">{{ haiku.top.text }}</span>　
+                        <span :style="getTextStyle(haiku.middle)">{{ haiku.middle.text }}</span>　
+                        <span :style="getTextStyle(haiku.bottom)">{{ haiku.bottom.text }}</span>
 
                         <template v-if="haiku.fourth && haiku.fifth">
                             <br>
-                            <span :style="{color: haiku.fourth.isOni ? 'purple' : 'inherit'}"
-                                style="margin-left:1em;">{{ haiku.fourth.text }}</span>　
-                            <span :style="{color: haiku.fifth.isOni ? 'purple' : 'inherit'}">{{ haiku.fifth.text
-                                }}</span>
+                            <span :style="[getTextStyle(haiku.fourth), {marginLeft:'1em'}]">{{ haiku.fourth.text
+                                }}</span>　
+                            <span :style="getTextStyle(haiku.fifth)">{{ haiku.fifth.text }}</span>
                         </template>
                     </div>
 
@@ -1159,11 +1156,14 @@
 
                     <div style="font-size:1.2rem; font-weight:bold; text-align:center; margin:10px 0;">
                         <div style="font-size:1.2rem; font-weight:bold; text-align:center; margin:10px 0;">
-                            {{ haiku.top.text }}　{{ haiku.middle.text }}　{{ haiku.bottom.text }}
+                            <span :style="getTextStyle(haiku.top)">{{ haiku.top.text }}</span>　<span
+                                :style="getTextStyle(haiku.middle)">{{ haiku.middle.text }}</span>　<span
+                                :style="getTextStyle(haiku.bottom)">{{ haiku.bottom.text }}</span>
                             <template v-if="haiku.fourth && haiku.fifth">
                                 <br>
                                 <span style="display:inline-block; margin-left:1em;">
-                                    {{ haiku.fourth.text }}　{{ haiku.fifth.text }}
+                                    <span :style="getTextStyle(haiku.fourth)">{{ haiku.fourth.text }}</span>　<span
+                                        :style="getTextStyle(haiku.fifth)">{{ haiku.fifth.text }}</span>
                                 </span>
                             </template>
                         </div>
@@ -1212,11 +1212,14 @@
 
                     <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
                         <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
-                            {{ h.top.text }}　{{ h.middle.text }}　{{ h.bottom.text }}
+                            <span :style="getTextStyle(h.top)">{{ h.top.text }}</span>　<span
+                                :style="getTextStyle(h.middle)">{{ h.middle.text }}</span>　<span
+                                :style="getTextStyle(h.bottom)">{{ h.bottom.text }}</span>
                             <template v-if="h.fourth && h.fifth">
                                 <br>
                                 <span style="display:inline-block; margin-left:1em;">
-                                    {{ h.fourth.text }}　{{ h.fifth.text }}
+                                    <span :style="getTextStyle(h.fourth)">{{ h.fourth.text }}</span>　<span
+                                        :style="getTextStyle(h.fifth)">{{ h.fifth.text }}</span>
                                 </span>
                             </template>
                         </div>
@@ -1241,11 +1244,15 @@
                     </div>
                     <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
                         <div style="font-size:1.3rem; font-weight:bold; margin:10px 0;">
-                            {{ item.haiku.top.text }}　{{ item.haiku.middle.text }}　{{ item.haiku.bottom.text }}
+                            <span :style="getTextStyle(item.haiku.top)">{{ item.haiku.top.text }}</span>　<span
+                                :style="getTextStyle(item.haiku.middle)">{{ item.haiku.middle.text }}</span>　<span
+                                :style="getTextStyle(item.haiku.bottom)">{{ item.haiku.bottom.text }}</span>
                             <template v-if="item.haiku.fourth && item.haiku.fifth">
                                 <br>
                                 <span style="display:inline-block; margin-left:1em;">
-                                    {{ item.haiku.fourth.text }}　{{ item.haiku.fifth.text }}
+                                    <span :style="getTextStyle(item.haiku.fourth)">{{ item.haiku.fourth.text
+                                        }}</span>　<span :style="getTextStyle(item.haiku.fifth)">{{ item.haiku.fifth.text
+                                        }}</span>
                                 </span>
                             </template>
                         </div>
@@ -1348,9 +1355,12 @@
                         <div style="font-weight:bold; color:#e91e63; margin-bottom:5px;">[MVP俳句]</div>
                         <div v-for="(h, i) in record.mvpHaikus" :key="i" class="tanzaku"
                             style="margin-bottom:5px; padding:5px; border:1px solid gold; font-size:1rem;">
-                            {{ i+1 }}位: {{ h.top.text }} {{ h.middle.text }} {{ h.bottom.text }}
+                            {{ i+1 }}位: <span :style="getTextStyle(h.top)">{{ h.top.text }}</span> <span
+                                :style="getTextStyle(h.middle)">{{ h.middle.text }}</span> <span
+                                :style="getTextStyle(h.bottom)">{{ h.bottom.text }}</span>
                             <template v-if="h.fourth && h.fifth">
-                                {{ h.fourth.text }} {{ h.fifth.text }}
+                                <span :style="getTextStyle(h.fourth)">{{ h.fourth.text }}</span> <span
+                                    :style="getTextStyle(h.fifth)">{{ h.fifth.text }}</span>
                             </template>
                             <br><span style="font-size:0.8rem; color:#666;">(詠: {{ getPlayerNameFromRecord(record,
                                 h.userId) }})</span>
@@ -1362,9 +1372,12 @@
                         <div style="font-weight:bold; color:var(--fav-color); margin-bottom:5px;">[お気に入り俳句]</div>
                         <div v-for="(item, idx) in getFavoritedHaikusFromRecord(record)" :key="idx" class="tanzaku"
                             style="margin-bottom:5px; padding:5px; border:1px solid var(--fav-color); font-size:1rem; background:#fffaf0;">
-                            ★ {{ item.haiku.top.text }} {{ item.haiku.middle.text }} {{ item.haiku.bottom.text }}
+                            ★ <span :style="getTextStyle(item.haiku.top)">{{ item.haiku.top.text }}</span> <span
+                                :style="getTextStyle(item.haiku.middle)">{{ item.haiku.middle.text }}</span> <span
+                                :style="getTextStyle(item.haiku.bottom)">{{ item.haiku.bottom.text }}</span>
                             <template v-if="item.haiku.fourth && item.haiku.fifth">
-                                {{ item.haiku.fourth.text }} {{ item.haiku.fifth.text }}
+                                <span :style="getTextStyle(item.haiku.fourth)">{{ item.haiku.fourth.text }}</span> <span
+                                    :style="getTextStyle(item.haiku.fifth)">{{ item.haiku.fifth.text }}</span>
                             </template>
                             <br><span style="font-size:0.8rem; color:#666;">(詠: {{ getPlayerNameFromRecord(record,
                                 item.haiku.userId) }}) / 選: {{ item.fanNames.join('、') }}</span>
@@ -1381,27 +1394,28 @@
                     <div class="special-bg"></div>
                     <div class="special-text">
                         <transition name="fade">
-                            <div v-if="visiblePhraseIndex >= 0" class="phrase top">{{ specialEffectHaiku.top.text }}
+                            <div v-if="visiblePhraseIndex >= 0" class="phrase top"
+                                :style="getTextStyle(specialEffectHaiku.top)">{{ specialEffectHaiku.top.text }}</div>
+                        </transition>
+                        <transition name="fade">
+                            <div v-if="visiblePhraseIndex >= 1" class="phrase middle"
+                                :style="getTextStyle(specialEffectHaiku.middle)">{{ specialEffectHaiku.middle.text }}
                             </div>
                         </transition>
                         <transition name="fade">
-                            <div v-if="visiblePhraseIndex >= 1" class="phrase middle">{{ specialEffectHaiku.middle.text
-                                }}</div>
+                            <div v-if="visiblePhraseIndex >= 2" class="phrase bottom"
+                                :style="getTextStyle(specialEffectHaiku.bottom)">{{ specialEffectHaiku.bottom.text }}
+                            </div>
                         </transition>
                         <transition name="fade">
-                            <div v-if="visiblePhraseIndex >= 2" class="phrase bottom">{{
-                                specialEffectHaiku.bottom.text
-                                }}</div>
+                            <div v-if="visiblePhraseIndex >= 3 && specialEffectHaiku.fourth" class="phrase fourth"
+                                :style="getTextStyle(specialEffectHaiku.fourth)">{{ specialEffectHaiku.fourth.text }}
+                            </div>
                         </transition>
                         <transition name="fade">
-                            <div v-if="visiblePhraseIndex >= 3 && specialEffectHaiku.fourth" class="phrase fourth">
-                                {{ specialEffectHaiku.fourth.text
-                                }}</div>
-                        </transition>
-                        <transition name="fade">
-                            <div v-if="visiblePhraseIndex >= 4 && specialEffectHaiku.fifth" class="phrase fifth">{{
-                                specialEffectHaiku.fifth.text
-                                }}</div>
+                            <div v-if="visiblePhraseIndex >= 4 && specialEffectHaiku.fifth" class="phrase fifth"
+                                :style="getTextStyle(specialEffectHaiku.fifth)">{{ specialEffectHaiku.fifth.text }}
+                            </div>
                         </transition>
                     </div>
                     <div class="special-footer"
@@ -3141,6 +3155,12 @@
                         classes.active = true;
                     }
                     return classes;
+                },
+                getTextStyle(card) {
+                    if (!card) return {};
+                    if (card.isCursed) return { color: '#ff0000', fontWeight: 'bold' };
+                    if (card.isOni) return { color: 'purple', fontWeight: 'bold' };
+                    return { color: 'inherit' };
                 },
 
                 // --- 詠唱アクション ---
