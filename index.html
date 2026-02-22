@@ -270,6 +270,25 @@
             color: #006400;
         }
 
+        .word-card.cursed {
+            border-color: #8b0000;
+            color: #ff0000;
+            background: #1a1a1a;
+            font-weight: bold;
+            box-shadow: 0 0 5px #ff0000;
+        }
+
+        .word-card.cursed .point-badge {
+            background: #8b0000;
+        }
+
+        .haiku-slot.filled.cursed {
+            border: 2px solid #8b0000;
+            background: #1a1a1a;
+            color: #ff0000;
+            box-shadow: inset 0 0 10px #8b0000;
+        }
+
         .word-card.selected {
             background: #ccc;
             color: #fff;
@@ -764,6 +783,23 @@
                         1ラウンドで作成できる自由記入カードの枚数
                     </p>
                 </div>
+
+                <!-- 呪札モード設定 -->
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-weight:bold;">👻 呪札モード</label>
+                        <div v-if="isMeMaster">
+                            <input type="checkbox" v-model="tempSettings.cursedMode" style="transform:scale(1.5);"
+                                @change="saveSettings">
+                        </div>
+                        <div v-else style="font-size:0.9rem;">
+                            {{ settings.cursedMode ? 'ON' : 'OFF' }}
+                        </div>
+                    </div>
+                    <p style="font-size:0.75rem; color:#666; margin-top:3px;">
+                        ランダムで必ず使わなければならない「呪札」が各人に配られます
+                    </p>
+                </div>
             </div>
 
             <div v-if="isMeMaster" style="text-align:center;">
@@ -970,6 +1006,10 @@
                             :disabled="!canSubmitHaiku">
                             詠む（提出）
                         </button>
+                        <div v-if="hasUnusedCursedCard"
+                            style="color:red; font-size:0.8rem; margin-top:5px; text-align:center; font-weight:bold;">
+                            ※呪札（赤黒のカード）を使用してください！
+                        </div>
                     </div>
                     <div v-else class="card-box" style="text-align:center;">
                         <p>提出完了！<br>親の選評を待っています...</p>
@@ -2210,7 +2250,7 @@
         }
 
         // 全プレイヤー分の手札を生成（プレイヤー間で重複なし）
-        function generateHandsForAllPlayers(playerCount, count5 = 5, count7 = 7, genreRatios = { normal: 0, abnormal: 10, neta: 0 }) {
+        function generateHandsForAllPlayers(playerCount, count5 = 5, count7 = 7, genreRatios = { normal: 0, abnormal: 10, neta: 0 }, isCursedMode = false) {
             const totalRatio = genreRatios.normal + genreRatios.abnormal + genreRatios.neta;
             if (totalRatio === 0) {
                 genreRatios = { normal: 0, abnormal: 10, neta: 0 };
@@ -2311,6 +2351,16 @@
                 hands.push(hand);
             }
 
+            if (isCursedMode) {
+                hands.forEach(hand => {
+                    const allCards = [...hand.fives, ...hand.sevens];
+                    if (allCards.length > 0) {
+                        const randomCursed = allCards[Math.floor(Math.random() * allCards.length)];
+                        randomCursed.isCursed = true;
+                    }
+                });
+            }
+
             return hands;
         }
 
@@ -2382,7 +2432,8 @@
                         genreAbnormal: 10,
                         genreNeta: 0,
                         speechEnabled: true, // 俳句演出読み上げ
-                        freeCardLimit: 1 // 自由記入枚数
+                        freeCardLimit: 1, // 自由記入枚数
+                        cursedMode: false
                     },
                     tempSettings: { // 編集用
                         timeLimitMin: 5,
@@ -2396,7 +2447,8 @@
                         genreAbnormal: 10,
                         genreNeta: 0,
                         speechEnabled: true, // 俳句演出読み上げ
-                        freeCardLimit: 1 // 自由記入枚数
+                        freeCardLimit: 1, // 自由記入枚数
+                        cursedMode: false
                     },
                     roundStartTime: null,
                     timeLeft: 0,
@@ -2431,13 +2483,26 @@
                 },
                 canSubmitHaiku() {
                     const base = this.myDraft.top && this.myDraft.middle && this.myDraft.bottom;
+                    let isFull = base;
                     if (this.settings.tankaMode) {
-                        return base && this.myDraft.fourth && this.myDraft.fifth;
+                        isFull = base && this.myDraft.fourth && this.myDraft.fifth;
                     }
-                    return base;
+                    if (!isFull) return false;
+                    return !this.hasUnusedCursedCard;
                 },
                 hasSubmitted() {
                     return this.currentHaikus.some(h => h.userId === this.myUid);
+                },
+                hasUnusedCursedCard() {
+                    if (!this.myHand) return false;
+                    const hasCursedInHand = [...this.myHand.fives, ...this.myHand.sevens].some(c => c.isCursed);
+                    if (!hasCursedInHand) return false;
+
+                    const slots = [this.myDraft.top, this.myDraft.middle, this.myDraft.bottom];
+                    if (this.settings.tankaMode) {
+                        slots.push(this.myDraft.fourth, this.myDraft.fifth);
+                    }
+                    return !slots.some(c => c && c.isCursed);
                 },
                 submittedCount() {
                     return this.currentHaikus.length;
@@ -2774,6 +2839,7 @@
                                     this.tempSettings.genreNeta = this.settings.genreNeta || 0;
                                     this.tempSettings.speechEnabled = (this.settings.speechEnabled !== undefined) ? this.settings.speechEnabled : true;
                                     this.tempSettings.freeCardLimit = this.settings.freeCardLimit || 1;
+                                    this.tempSettings.cursedMode = this.settings.cursedMode || false;
                                 }
                             } else {
                                 this.viewState = 'GAME';
@@ -3059,6 +3125,7 @@
                     return {
                         oni: card.isOni,
                         free: card.isFree,
+                        cursed: card.isCursed,
                         selected: this.isCardSelected(card)
                     };
                 },
@@ -3068,6 +3135,7 @@
                         classes.filled = true;
                         if (card.isOni) classes.oni = true;
                         if (card.isFree) classes.free = true;
+                        if (card.isCursed) classes.cursed = true;
                     }
                     if (this.activeSlot === part) {
                         classes.active = true;
@@ -3315,28 +3383,57 @@
                     });
 
                     unsubmittedPlayers.forEach(p => {
-                        const topCands = p.hand.fives.filter(c => !c.isFree);
-                        const top = topCands[Math.floor(Math.random() * topCands.length)];
+                        let top, middle, bottom, fourth, fifth;
+                        const availableFives = p.hand.fives.filter(c => !c.isFree);
+                        const availableSevens = p.hand.sevens.filter(c => !c.isFree);
 
-                        const midCands = p.hand.sevens.filter(c => !c.isFree);
-                        const middle = midCands[Math.floor(Math.random() * midCands.length)];
+                        // 呪札を探す
+                        const cursedFive = availableFives.find(c => c.isCursed);
+                        const cursedSeven = availableSevens.find(c => c.isCursed);
 
-                        const botCands = topCands.filter(c => c.id !== top.id);
-                        const bottom = botCands.length > 0 ? botCands[Math.floor(Math.random() * botCands.length)] : top;
+                        // シャッフルしてから選ぶ関数
+                        const pickAndRemove = (arr, forceCard) => {
+                            if (forceCard) {
+                                const idx = arr.findIndex(c => c.id === forceCard.id);
+                                if (idx !== -1) arr.splice(idx, 1);
+                                return forceCard;
+                            }
+                            if (arr.length === 0) return null;
+                            const idx = Math.floor(Math.random() * arr.length);
+                            return arr.splice(idx, 1)[0];
+                        };
 
-                        let fourth = null;
-                        let fifth = null;
-                        if (this.settings.tankaMode) {
-                            const fourthCands = midCands.filter(c => c.id !== middle.id);
-                            fourth = fourthCands.length > 0 ? fourthCands[Math.floor(Math.random() * fourthCands.length)] : middle;
-
-                            const fifthCands = fourthCands.filter(c => c.id !== fourth.id);
-                            fifth = fifthCands.length > 0 ? fifthCands[Math.floor(Math.random() * fifthCands.length)] : middle;
+                        if (cursedFive) {
+                            if (Math.random() < 0.5) top = pickAndRemove(availableFives, cursedFive);
+                            else bottom = pickAndRemove(availableFives, cursedFive);
+                        }
+                        if (cursedSeven) {
+                            if (this.settings.tankaMode) {
+                                const r = Math.random();
+                                if (r < 0.33) middle = pickAndRemove(availableSevens, cursedSeven);
+                                else if (r < 0.66) fourth = pickAndRemove(availableSevens, cursedSeven);
+                                else fifth = pickAndRemove(availableSevens, cursedSeven);
+                            } else {
+                                middle = pickAndRemove(availableSevens, cursedSeven);
+                            }
                         }
 
-                        let cardScore = top.score + middle.score + bottom.score;
+                        if (!top) top = pickAndRemove(availableFives);
+                        if (!bottom) bottom = pickAndRemove(availableFives);
+                        if (!top) top = bottom;
+                        if (!bottom) bottom = top;
+
+                        if (!middle) middle = pickAndRemove(availableSevens);
+                        if (this.settings.tankaMode) {
+                            if (!fourth) fourth = pickAndRemove(availableSevens);
+                            if (!fifth) fifth = pickAndRemove(availableSevens);
+                            if (!fourth) fourth = middle;
+                            if (!fifth) fifth = middle;
+                        }
+
+                        let cardScore = (top?.score || 0) + (middle?.score || 0) + (bottom?.score || 0);
                         if (this.settings.tankaMode && fourth && fifth) {
-                            cardScore += fourth.score + fifth.score;
+                            cardScore += (fourth?.score || 0) + (fifth?.score || 0);
                         }
 
                         const haikuId = `${this.gameCount}_${this.roundCount}_${p.uid}`;
@@ -3510,7 +3607,8 @@
                         genreNeta: this.tempSettings.genreNeta,
                         speechEnabled: this.tempSettings.speechEnabled,
                         freeCardLimit: this.tempSettings.freeCardLimit || 1,
-                        tankaMode: this.tempSettings.tankaMode || false
+                        tankaMode: this.tempSettings.tankaMode || false,
+                        cursedMode: this.tempSettings.cursedMode || false
                     };
                     await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
                 },
@@ -3547,7 +3645,8 @@
                             this.players.length,
                             this.tempSettings.handSizeFive,
                             this.tempSettings.handSizeSeven,
-                            genreRatios
+                            genreRatios,
+                            this.tempSettings.cursedMode
                         );
                         const refreshedPlayers = this.players.map((p, idx) => {
                             return {
@@ -3647,7 +3746,8 @@
                             this.players.length,
                             this.settings.handSizeFive,
                             this.settings.handSizeSeven,
-                            genreRatios
+                            genreRatios,
+                            this.settings.cursedMode
                         );
                         const refreshedPlayers = this.players.map((p, idx) => {
                             return { ...p, hand: allHands[idx] };
@@ -3678,7 +3778,8 @@
                         this.players.length,
                         this.settings.handSizeFive,
                         this.settings.handSizeSeven,
-                        genreRatios
+                        genreRatios,
+                        this.settings.cursedMode
                     );
                     const resetPlayers = this.players.map((p, idx) => ({
                         ...p,
