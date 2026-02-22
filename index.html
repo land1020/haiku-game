@@ -789,8 +789,8 @@
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <label style="font-weight:bold;">👻 呪札モード</label>
                         <div v-if="isMeMaster">
-                            <input type="checkbox" v-model="tempSettings.cursedMode" style="transform:scale(1.5);"
-                                @change="saveSettings">
+                            <input type="checkbox" v-model="tempSettings.cursedMode" :disabled="tempSettings.noroiMode"
+                                style="transform:scale(1.5);" @change="saveSettings">
                         </div>
                         <div v-else style="font-size:0.9rem;">
                             {{ settings.cursedMode ? 'ON' : 'OFF' }}
@@ -798,6 +798,23 @@
                     </div>
                     <p style="font-size:0.75rem; color:#666; margin-top:3px;">
                         ランダムで必ず使わなければならない「呪札」が各人に配られます
+                    </p>
+                </div>
+
+                <!-- 呪いモード設定 -->
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-weight:bold;">👿 呪いモード</label>
+                        <div v-if="isMeMaster">
+                            <input type="checkbox" v-model="tempSettings.noroiMode" :disabled="tempSettings.cursedMode"
+                                style="transform:scale(1.5);" @change="saveSettings">
+                        </div>
+                        <div v-else style="font-size:0.9rem;">
+                            {{ settings.noroiMode ? 'ON' : 'OFF' }}
+                        </div>
+                    </div>
+                    <p style="font-size:0.75rem; color:#666; margin-top:3px;">
+                        親が選んだ1つのワードが、全プレイヤーの手札に「呪札」として追加されます
                     </p>
                 </div>
             </div>
@@ -869,8 +886,32 @@
                     </div>
                 </div>
 
-                <!-- 親の画面 (通常モード) -->
-                <div v-if="isMeMaster && !settings.everyonePlays" class="card-box" style="text-align:center;">
+                <!-- 親の呪い選定画面（呪いモードON ＆ 未配布時） -->
+                <div v-if="isMeMaster && settings.noroiMode && !noroiDistributed" class="card-box"
+                    style="text-align:center; background:#fff0f5; border: 2px dashed #dc3545; margin-bottom:15px;">
+                    <h3 style="color:#dc3545;">👿 呪いワード選定</h3>
+                    <p style="font-size:0.9rem;">プレイヤー達に配る呪いの言葉を1つ選んでください。（下部の手札や自由記入から選択）</p>
+
+                    <div style="margin:15px 0; display:flex; justify-content:center;">
+                        <div class="haiku-slot" :class="getSlotClass(noroiDraft, 'noroi')"
+                            @click="activateSlot('noroi')"
+                            style="width:200px; padding:15px; font-size:1.2rem; min-height:50px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                            <span v-if="noroiDraft" :style="getTextStyle(noroiDraft)">{{ noroiDraft.text }}</span>
+                            <span v-else style="color:#aaa;">（枠をタップして下から選択）</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-danger" @click="distributeNoroiWord" :disabled="!noroiDraft">
+                        プレイヤー全員に配る（取り消し不可）
+                    </button>
+                </div>
+
+                <!-- 親の画面 (通常モード、呪い選定中ではない場合) -->
+                <div v-if="isMeMaster && !settings.everyonePlays && !(settings.noroiMode && !noroiDistributed)"
+                    class="card-box" style="text-align:center;">
+                    <p v-if="settings.noroiMode && noroiDistributed"
+                        style="color:#dc3545; font-weight:bold; margin-bottom:10px;">👿 呪いを配布しました！</p>
+
                     <!-- 親用タイマー表示 -->
                     <div v-if="gamePhase === 'WRITING'"
                         style="margin-bottom:10px; padding:8px; background:#fff3e0; border-radius:4px; border:1px solid #ffcc80;">
@@ -889,11 +930,20 @@
                     <p style="font-size:0.8rem; color:#666; margin-top:5px;">※全員出すと自動で進みます</p>
                 </div>
 
-                <!-- 子の画面（または全員参加モードの全員） -->
-                <div v-else>
-                    <!-- 親用の強制進行ボタン（全員参加モード時） -->
-                    <div v-if="isMeMaster && settings.everyonePlays" class="card-box"
-                        style="text-align:center; margin-bottom:15px; background:#fff3e0;">
+                <!-- 子の画面（または全員参加モードの全員、または呪い選定中の親） -->
+                <div v-if="!isMeMaster || settings.everyonePlays || (settings.noroiMode && !noroiDistributed)">
+
+                    <!-- 呪いモード待機画面（プレイヤー用） -->
+                    <div v-if="!isMeMaster && settings.noroiMode && !noroiDistributed"
+                        style="padding:10px; margin-bottom:15px; text-align:center; color:#dc3545; font-weight:bold; border: 2px dashed #dc3545; background:#fff0f5; border-radius:8px;">
+                        👿 親が呪いの言葉を選定中です...（待機）<br>
+                        <span
+                            style="font-size:0.8rem; font-weight:normal; color:#666;">※呪いが配られるまで、自由にワードを作成したり思考したりできますが、詠むことはできません。</span>
+                    </div>
+
+                    <!-- 親用の強制進行ボタン（全員参加モード時で呪い配布後または通常） -->
+                    <div v-if="isMeMaster && settings.everyonePlays && !(settings.noroiMode && !noroiDistributed)"
+                        class="card-box" style="text-align:center; margin-bottom:15px; background:#fff3e0;">
                         <p style="font-size:0.9rem; font-weight:bold; color:#e65100; margin-bottom:5px;">
                             あなたは親ですが、今回は参加者です！</p>
                         <button class="btn btn-secondary" @click="forceAllSubmit"
@@ -901,31 +951,41 @@
                             強制的に次へ進む
                         </button>
                     </div>
-                    <!-- プレビュー & リセット -->
-                    <div class="haiku-preview">
+
+                    <!-- プレビュー & リセット（親が呪い選定中の場合は非表示） -->
+                    <div v-show="!(isMeMaster && settings.noroiMode && !noroiDistributed)" class="haiku-preview">
                         <!-- 上五 -->
                         <div class="haiku-slot" :class="getSlotClass(myDraft.top, 'top')" @click="activateSlot('top')">
-                            {{ myDraft.top ? myDraft.top.text : '（上五）' }}
+                            <span v-if="myDraft.top" :style="getTextStyle(myDraft.top)">{{ myDraft.top.text }}</span>
+                            <span v-else>（上五）</span>
                         </div>
                         <!-- 中七 -->
                         <div class="haiku-slot" :class="getSlotClass(myDraft.middle, 'middle')"
                             @click="activateSlot('middle')">
-                            {{ myDraft.middle ? myDraft.middle.text : '（中七）' }}
+                            <span v-if="myDraft.middle" :style="getTextStyle(myDraft.middle)">{{ myDraft.middle.text
+                                }}</span>
+                            <span v-else>（中七）</span>
                         </div>
                         <!-- 下五 -->
                         <div class="haiku-slot" :class="getSlotClass(myDraft.bottom, 'bottom')"
                             @click="activateSlot('bottom')">
-                            {{ myDraft.bottom ? myDraft.bottom.text : '（下五）' }}
+                            <span v-if="myDraft.bottom" :style="getTextStyle(myDraft.bottom)">{{ myDraft.bottom.text
+                                }}</span>
+                            <span v-else>（下五）</span>
                         </div>
                         <!-- 短歌用: 第4句(7) -->
                         <div v-if="settings.tankaMode" class="haiku-slot"
                             :class="getSlotClass(myDraft.fourth, 'fourth')" @click="activateSlot('fourth')">
-                            {{ myDraft.fourth ? myDraft.fourth.text : '（七）' }}
+                            <span v-if="myDraft.fourth" :style="getTextStyle(myDraft.fourth)">{{ myDraft.fourth.text
+                                }}</span>
+                            <span v-else>（七）</span>
                         </div>
                         <!-- 短歌用: 第5句(7) -->
                         <div v-if="settings.tankaMode" class="haiku-slot" :class="getSlotClass(myDraft.fifth, 'fifth')"
                             @click="activateSlot('fifth')">
-                            {{ myDraft.fifth ? myDraft.fifth.text : '（七）' }}
+                            <span v-if="myDraft.fifth" :style="getTextStyle(myDraft.fifth)">{{ myDraft.fifth.text
+                                }}</span>
+                            <span v-else>（七）</span>
                         </div>
 
                         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
@@ -979,7 +1039,9 @@
                             </div>
                         </div>
 
-                        <div style="margin-top:15px; text-align:center;">
+                        <!-- 演出チェック（親が呪い選定中の場合は非表示） -->
+                        <div v-show="!(isMeMaster && settings.noroiMode && !noroiDistributed)"
+                            style="margin-top:15px; text-align:center;">
                             <label
                                 style="display:inline-flex; align-items:center; gap:5px; padding:8px; background:#fff8dc; border:1px solid #ffd700; border-radius:4px; font-weight:bold; cursor:pointer;">
                                 <input type="checkbox" v-model="useSpecialEffect" :disabled="hasMySpecialEffectUsed">
@@ -990,9 +1052,9 @@
                             </div>
                         </div>
 
-                        <!-- タイマー表示 -->
-                        <div v-if="gamePhase === 'WRITING'"
-                            style="text-align:center; margin-bottom:10px; padding:8px; background:#fff3e0; border-radius:4px; border:1px solid #ffcc80;">
+                        <!-- タイマー表示（通常プレイヤー用） -->
+                        <div v-if="gamePhase === 'WRITING' && !(isMeMaster && settings.noroiMode && !noroiDistributed)"
+                            style="text-align:center; margin-top:15px; margin-bottom:10px; padding:8px; background:#fff3e0; border-radius:4px; border:1px solid #ffcc80;">
                             <span v-if="timeLeft > 0"
                                 style="font-size:1.1rem; font-weight:bold; color:var(--accent-color);">
                                 ⏳ 残り {{ Math.floor(timeLeft / 60) }}:{{ ('0' + (timeLeft % 60)).slice(-2) }}
@@ -1002,13 +1064,16 @@
                             </span>
                         </div>
 
-                        <button class="btn btn-primary" style="margin-top:10px;" @click="submitHaiku"
-                            :disabled="!canSubmitHaiku">
-                            詠む（提出）
-                        </button>
-                        <div v-if="hasUnusedCursedCard"
-                            style="color:red; font-size:0.8rem; margin-top:5px; text-align:center; font-weight:bold;">
-                            ※呪札（赤黒のカード）を使用してください！
+                        <!-- 提出ボタン（親が呪い選定中の場合は非表示） -->
+                        <div v-show="!(isMeMaster && settings.noroiMode && !noroiDistributed)">
+                            <button class="btn btn-primary" style="margin-top:10px;" @click="submitHaiku"
+                                :disabled="!canSubmitHaiku">
+                                詠む（提出）
+                            </button>
+                            <div v-if="hasUnusedCursedCard"
+                                style="color:red; font-size:0.8rem; margin-top:5px; text-align:center; font-weight:bold;">
+                                ※呪札（赤黒のカード）を使用してください！
+                            </div>
                         </div>
                     </div>
                     <div v-else class="card-box" style="text-align:center;">
@@ -2447,7 +2512,8 @@
                         genreNeta: 0,
                         speechEnabled: true, // 俳句演出読み上げ
                         freeCardLimit: 1, // 自由記入枚数
-                        cursedMode: false
+                        cursedMode: false,
+                        noroiMode: false
                     },
                     tempSettings: { // 編集用
                         timeLimitMin: 5,
@@ -2462,8 +2528,11 @@
                         genreNeta: 0,
                         speechEnabled: true, // 俳句演出読み上げ
                         freeCardLimit: 1, // 自由記入枚数
-                        cursedMode: false
+                        cursedMode: false,
+                        noroiMode: false
                     },
+                    noroiDistributed: false,
+                    noroiDraft: null,
                     roundStartTime: null,
                     timeLeft: 0,
                     timerInterval: null
@@ -2502,6 +2571,7 @@
                         isFull = base && this.myDraft.fourth && this.myDraft.fifth;
                     }
                     if (!isFull) return false;
+                    if (this.settings.noroiMode && !this.noroiDistributed) return false;
                     return !this.hasUnusedCursedCard;
                 },
                 hasSubmitted() {
@@ -2809,6 +2879,7 @@
                                 speechEnabled: true,
                                 ...data.settings
                             };
+                            this.noroiDistributed = data.noroiDistributed || false;
                             // 編集用変数にも反映（自分がホストで編集中でない場合...は難しいので、とりあえず同期）
                             // 自分が編集中の場合、ループしないように少し工夫が必要だが、
                             // 今回は単純に同期する（他人が変えることはない前提）
@@ -2854,6 +2925,7 @@
                                     this.tempSettings.speechEnabled = (this.settings.speechEnabled !== undefined) ? this.settings.speechEnabled : true;
                                     this.tempSettings.freeCardLimit = this.settings.freeCardLimit || 1;
                                     this.tempSettings.cursedMode = this.settings.cursedMode || false;
+                                    this.tempSettings.noroiMode = this.settings.noroiMode || false;
                                 }
                             } else {
                                 this.viewState = 'GAME';
@@ -3173,6 +3245,7 @@
                         if ((d.fourth && d.fourth.id === card.id) ||
                             (d.fifth && d.fifth.id === card.id)) return true;
                     }
+                    if (this.noroiDraft && this.noroiDraft.id === card.id) return true;
                     return false;
                 },
                 activateSlot(part) {
@@ -3183,6 +3256,11 @@
                     }
                 },
                 selectFive(card) {
+                    if (this.activeSlot === 'noroi') {
+                        this.noroiDraft = card;
+                        this.activeSlot = null;
+                        return;
+                    }
                     if (this.activeSlot === 'top' || this.activeSlot === 'bottom') {
                         if (card.isFree && !this.canSetMoreFreeCards(this.activeSlot)) {
                             alert(`俳句にセットできる自由記入ワードは${this.settings.freeCardLimit || 1}枚までです。`);
@@ -3209,6 +3287,11 @@
                     this.myDraft[targetSlot] = card;
                 },
                 selectSeven(card) {
+                    if (this.activeSlot === 'noroi') {
+                        this.noroiDraft = card;
+                        this.activeSlot = null;
+                        return;
+                    }
                     if (this.activeSlot === 'middle' ||
                         (this.settings.tankaMode && (this.activeSlot === 'fourth' || this.activeSlot === 'fifth'))) {
                         if (card.isFree && !this.canSetMoreFreeCards(this.activeSlot)) {
@@ -3345,6 +3428,66 @@
                     }
 
                     this.myDraft = { top: null, middle: null, bottom: null, fourth: null, fifth: null };
+                },
+
+                // --- 呪い配布処理 ---
+                async distributeNoroiWord() {
+                    if (!this.noroiDraft) return;
+                    try {
+                        const roomRef = doc(db, "rooms", this.roomId);
+                        await runTransaction(db, async (transaction) => {
+                            const roomDoc = await transaction.get(roomRef);
+                            if (!roomDoc.exists()) throw "Room not found";
+                            const data = roomDoc.data();
+                            const players = data.players || [];
+
+                            const cursedCard = {
+                                ...this.noroiDraft,
+                                isCursed: true,
+                                id: 'noroi-' + Date.now() + Math.floor(Math.random() * 1000)
+                            };
+
+                            const updatedPlayers = players.map(p => {
+                                if (p.uid === this.masterUid) {
+                                    // 親は自身の選んだ呪い元カードを手札から削除
+                                    // 自由記入の場合は消えないが、元々一時的なのでOK。通常手札カードを消しておく。
+                                    let newFives = p.hand.fives.filter(c => c.id !== this.noroiDraft.id);
+                                    let newSevens = p.hand.sevens.filter(c => c.id !== this.noroiDraft.id);
+
+                                    // 全員参加モードの場合は、親自身にも呪札として追加する
+                                    if (this.settings.everyonePlays) {
+                                        if (cursedCard.type === 5) newFives.push({ ...cursedCard });
+                                        else newSevens.push({ ...cursedCard });
+                                    }
+
+                                    return {
+                                        ...p,
+                                        hand: { fives: newFives, sevens: newSevens }
+                                    };
+                                } else {
+                                    // 他プレイヤーには呪札として加える
+                                    let newFives = [...p.hand.fives];
+                                    let newSevens = [...p.hand.sevens];
+                                    if (cursedCard.type === 5) newFives.push({ ...cursedCard });
+                                    else newSevens.push({ ...cursedCard });
+                                    return {
+                                        ...p,
+                                        hand: { fives: newFives, sevens: newSevens }
+                                    };
+                                }
+                            });
+
+                            transaction.update(roomRef, {
+                                players: updatedPlayers,
+                                noroiDistributed: true
+                            });
+                        });
+                        this.noroiDraft = null;
+                        this.activeSlot = null;
+                    } catch (e) {
+                        console.error('Distribute error', e);
+                        alert('呪いの配布に失敗しました');
+                    }
                 },
 
                 async submitHaiku() {
@@ -3628,7 +3771,8 @@
                         speechEnabled: this.tempSettings.speechEnabled,
                         freeCardLimit: this.tempSettings.freeCardLimit || 1,
                         tankaMode: this.tempSettings.tankaMode || false,
-                        cursedMode: this.tempSettings.cursedMode || false
+                        cursedMode: this.tempSettings.cursedMode || false,
+                        noroiMode: this.tempSettings.noroiMode || false
                     };
                     await updateDoc(doc(db, "rooms", this.roomId), { settings: newSettings });
                 },
@@ -3681,7 +3825,8 @@
                             roundStartTime: Date.now(),
                             masterUid: nextMasterUid,
                             masterHistory: [nextMasterUid],
-                            players: refreshedPlayers
+                            players: refreshedPlayers,
+                            noroiDistributed: false
                         });
                         console.log('Game status updated to WRITING');
                     } catch (e) {
@@ -3782,7 +3927,8 @@
                             masterHistory: newHistory,
                             status: 'WRITING',
                             players: refreshedPlayers,
-                            roundStartTime: Date.now()
+                            roundStartTime: Date.now(),
+                            noroiDistributed: false
                         });
                     }
                 },
